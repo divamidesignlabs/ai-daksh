@@ -14,6 +14,7 @@ This document describes how DAKSH works under the hood — from reading Markdown
 
 - **Input**: LLM-generated `project-epics.ini` based on upstream project specs and docs. These are verified by humans and serve as the technical single source of truth.
 - **Expansion**: Each story in the project file is expanded into a standalone `project-trd.md` (one per story), and then into a `trd-task-list.md` (one per TRD).
+- **Linkage**: Each TRD and task list is linked back to its parent story as well as the corresponding documentation (in the form of front-matter), ensuring traceability.
 - **Parser**: Extracts hierarchical relationships from `project-epics.ini` (INI format) and associated Markdown: specs → epics/stories → TRDs → task lists
 - **Validators**: Ensure references are correct, paths exist, and artifact linkages are complete
 - **Output Consumers**:
