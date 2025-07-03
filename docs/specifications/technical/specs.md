@@ -1,3 +1,6 @@
+---
+stories: 1.1
+---
 # 🛠️ Technical Specifications: DAKSH
 
 ---
