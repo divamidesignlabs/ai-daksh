@@ -6,6 +6,7 @@ __all__ = [
     '__email__',
     'cli',
     'health',
+    'io'
 ]
 
 __author__ = """Yeshwanth Reddy"""
@@ -14,3 +15,5 @@ __version__ = '0.1.0'
 
 from .__pre_init__ import cli
 from . import health
+
+from . import io
