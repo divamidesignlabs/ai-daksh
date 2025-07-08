@@ -40,6 +40,15 @@ class GoogleDriveClient:
                 token.write(self.creds.to_json())
         return self.creds
     
+    def get_mime_type(self, file_id):
+        """Get the MIME type of a file in Google Drive."""
+        try:
+            file_metadata = self.service.files().get(fileId=file_id, fields="mimeType").execute()
+            return file_metadata.get("mimeType", "unknown")
+        except HttpError as error:
+            print(f"An error occurred: {error}")
+            return None
+    
     def download_file(self, file_id, destination):
         """Download a file from Google Drive."""
         try:
@@ -146,6 +155,32 @@ def download_file_command(file_id: str, destination):
     """Download a file from Google Drive."""
     client = GoogleDriveClient()
     client.download_file(file_id, destination)
+
+@cli.command(name='get-mime-type')
+def get_mime_type_command(file_id: str):
+    """Get the MIME type of a file in Google Drive."""
+    client = GoogleDriveClient()
+    mime_type = client.get_mime_type(file_id)
+    if mime_type:
+        print(f"MIME type of file {file_id}: {mime_type}")
+    else:
+        print(f"Could not retrieve MIME type for file {file_id}.")
+
+@cli.command(name='search-drive-files')
+def search_drive_files_command(query: str):
+    """Search for files in Google Drive."""
+    client = GoogleDriveClient()
+    try:
+        results = client.service.files().list(q=f"name contains '{query}'", pageSize=10, fields="nextPageToken, files(id, name)").execute()
+        items = results.get('files', [])
+        if not items:
+            print("No files found.")
+        else:
+            print("Files:")
+            for item in items:
+                print(f"{item['name']} ({item['id']})")
+    except HttpError as error:
+        print(f"An error occurred: {error}")
 
 if __name__ == "__main__":
     list_drive_files_command()
