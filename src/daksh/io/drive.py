@@ -144,6 +144,50 @@ class GoogleDriveClient:
             ix += 1
             timer()
 
+    def upload_files(self, file_paths, mime_type=None, folder_name=None):
+        """Upload multiple files to Google Drive. If folder_name is given, upload to that folder (create if needed)."""
+        from googleapiclient.http import MediaFileUpload
+        parent_id = None
+        if folder_name:
+            # Search for folder by name
+            results = self.service.files().list(
+                q=f"mimeType='application/vnd.google-apps.folder' and name='{folder_name}' and trashed=false",
+                spaces='drive',
+                fields='files(id, name)',
+                pageSize=1
+            ).execute()
+            folders = results.get('files', [])
+            if folders:
+                parent_id = folders[0]['id']
+            else:
+                # Create folder if not found
+                folder_metadata = {
+                    'name': folder_name,
+                    'mimeType': 'application/vnd.google-apps.folder'
+                }
+                folder = self.service.files().create(body=folder_metadata, fields='id').execute()
+                parent_id = folder.get('id')
+        results = []
+        for file_path in file_paths:
+            file_metadata = {'name': os.path.basename(file_path)}
+            if parent_id:
+                file_metadata['parents'] = [parent_id]
+            media = MediaFileUpload(file_path, mimetype=mime_type, resumable=True)
+            try:
+                file = self.service.files().create(
+                    body=file_metadata,
+                    media_body=media,
+                    fields='id, name'
+                ).execute()
+                print(f"Uploaded file: {file.get('name')} (ID: {file.get('id')})")
+                results.append(file)
+            except HttpError as error:
+                print(f"An error occurred uploading {file_path}: {error}")
+                results.append(None)
+        return results
+
+
+
 
 @cli.command(name='list-drive-files')
 def list_drive_files_command():
@@ -181,6 +225,14 @@ def search_drive_files_command(query: str):
                 print(f"{item['name']} ({item['id']})")
     except HttpError as error:
         print(f"An error occurred: {error}")
+
+@cli.command(name='upload-files')
+def upload_files_command(file_paths: list[str], mime_type: str = None, folder_name: str = None):
+    """Upload multiple files to Google Drive. Optionally specify a folder name."""
+    client = GoogleDriveClient()
+    client.upload_files(file_paths, mime_type, folder_name)
+"""Google Drive connector for listing folders and downloading files."""
+
 
 if __name__ == "__main__":
     list_drive_files_command()
