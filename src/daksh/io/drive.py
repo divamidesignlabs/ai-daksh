@@ -144,6 +144,41 @@ class GoogleDriveClient:
             ix += 1
             timer()
 
+    def list_files_in_folder(self, folder_name, max_files=100):
+        """List files inside a specific folder by name, supporting shared drives."""
+        try:
+            folder_query = f"mimeType = 'application/vnd.google-apps.folder' and name = '{folder_name}' and trashed = false"
+            folder_result = self.service.files().list(
+                q=folder_query,
+                pageSize=1,
+                fields="files(id, name)",
+                supportsAllDrives=True,
+                includeItemsFromAllDrives=True
+            ).execute()
+            folders = folder_result.get('files', [])
+            if not folders:
+                print(f"No folder found with name: {folder_name}")
+                return
+            folder_id = folders[0]['id']
+
+            files_query = f"'{folder_id}' in parents and trashed = false"
+            results = self.service.files().list(
+                q=files_query,
+                pageSize=max_files,
+                fields="nextPageToken, files(id, name)",
+                supportsAllDrives=True,
+                includeItemsFromAllDrives=True
+            ).execute()
+            items = results.get('files', [])
+            if not items:
+                print(f"No files found in folder: {folder_name}")
+                return
+            print(f"Files in folder '{folder_name}':")
+            for item in items:
+                print(f"{item['name']} ({item['id']})")
+        except HttpError as error:
+            print(f"An error occurred: {error}")
+
     def upload_files(self, file_paths, mime_type=None, folder_name=None):
         """Upload multiple files to Google Drive. If folder_name is given, upload to that folder (create if needed)."""
         from googleapiclient.http import MediaFileUpload
@@ -231,6 +266,14 @@ def upload_files_command(file_paths: list[str], mime_type: str = None, folder_na
     """Upload multiple files to Google Drive. Optionally specify a folder name."""
     client = GoogleDriveClient()
     client.upload_files(file_paths, mime_type, folder_name)
+
+
+# New CLI command for listing files in a folder
+@cli.command(name='list-files-in-folder')
+def list_files_in_folder_command(folder_name: str):
+    """List files in a specific folder by folder name."""
+    client = GoogleDriveClient()
+    client.list_files_in_folder(folder_name)
 """Google Drive connector for listing folders and downloading files."""
 
 
