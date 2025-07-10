@@ -9,7 +9,7 @@ pipeline {
     stages {
         stage('Install Dependencies') {
             steps {
-                sh 'python -m venv venv && . venv/bin/activate && pip install -r requirements/docs.txt'
+                sh 'python3 -m venv venv && . venv/bin/activate && pip install -r requirements/docs.txt'
             }
 
         }
