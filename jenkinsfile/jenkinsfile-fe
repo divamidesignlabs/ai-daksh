@@ -1,0 +1,56 @@
+pipeline {
+    agent any
+    environment {
+        S3_BUCKET="ai-frontend-deployments"
+        CLOUDFRONT_DISTRIBUTION="E1KZXS3W83877S"
+        LINK="https://ai.internal.divami.com/ai-daksh"
+        GOOGLE_CHAT_LINK="https://chat.googleapis.com/v1/spaces/AAAAdtA0kaI/messages?key=AIzaSyDdI0hCZtE6vySjMm-WEfRq3CPzqKqqsHI&token=UH4Advudj0TXbQhfbLQP60Bmz2d2hXRqqtIR6raO4LQ"
+    }
+    stages {
+        stage('Install Dependencies') {
+            steps {
+                sh 'pip install -r requirements/docs.txt'
+            }
+        }
+
+        stage('Generate the build file') {
+            steps {
+                script { 
+                    sh 'mkdocs build'   
+                }
+            }
+        }
+        stage('Upload to S3') {
+            steps {
+                sh "mv site/ ai-daksh/"
+                sh "aws s3 cp ./ai-daksh/ s3://${S3_BUCKET}/ai-daksh --recursive"
+            }
+        }
+        stage('Invalidate CloudFront Cache') {
+            steps {
+                sh "aws cloudfront create-invalidation --distribution-id ${CLOUDFRONT_DISTRIBUTION} --paths '/*'"
+            }
+        }
+    }
+    post {
+        always { 
+            script{
+                def message = "Project Name: ${JOB_NAME}\n" +
+                                "Build Number: ${BUILD_NUMBER}\n" +
+                                "Git Branch: ${GIT_BRANCH}\n" +
+        
+                def buildResult = currentBuild.currentResult
+                if (buildResult == "SUCCESS") {
+                    message +=  "Output: ${LINK}\n" +
+                                "Build Result: Success"
+                } 
+                else {
+                    message += "Output Log: ${RUN_DISPLAY_URL}\n" +
+                                "Build Result: Failed"
+                }
+                googlechatnotification message: message, url: "${GOOGLE_CHAT_LINK}"
+                cleanWs()
+            }
+        }
+    }
+}
