@@ -9,8 +9,9 @@ pipeline {
     stages {
         stage('Install Dependencies') {
             steps {
-                sh 'pip install -r requirements/docs.txt'
+                sh 'python -m venv venv && . venv/bin/activate && pip install -r requirements/docs.txt'
             }
+
         }
 
         stage('Generate the build file') {
