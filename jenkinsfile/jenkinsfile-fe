@@ -7,20 +7,14 @@ pipeline {
         GOOGLE_CHAT_LINK="https://chat.googleapis.com/v1/spaces/AAAAdtA0kaI/messages?key=AIzaSyDdI0hCZtE6vySjMm-WEfRq3CPzqKqqsHI&token=UH4Advudj0TXbQhfbLQP60Bmz2d2hXRqqtIR6raO4LQ"
     }
     stages {
-        stage('Install Dependencies') {
+        stage('Install Dependencies and Generate the build file') {
             steps {
-                sh 'python3 -m venv venv && . venv/bin/activate && pip install -r requirements/docs.txt'
+                sh 'python3 -m venv venv && . venv/bin/activate && pip install -r requirements/docs.txt && mkdocs build'
             }
 
         }
 
-        stage('Generate the build file') {
-            steps {
-                script { 
-                    sh 'mkdocs build'   
-                }
-            }
-        }
+        
         stage('Upload to S3') {
             steps {
                 sh "mv site/ ai-daksh/"
