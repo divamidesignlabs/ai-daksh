@@ -37,7 +37,7 @@ pipeline {
             script{
                 def message = "Project Name: ${JOB_NAME}\n" +
                                 "Build Number: ${BUILD_NUMBER}\n" +
-                                "Git Branch: ${GIT_BRANCH}\n" +
+                                "Git Branch: ${GIT_BRANCH}\n"
         
                 def buildResult = currentBuild.currentResult
                 if (buildResult == "SUCCESS") {
