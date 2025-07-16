@@ -2,6 +2,8 @@
 
 ## Install
 ```
+$ git clone https://github.com/divamidesignlabs/ai-daksh
+$ cd ai-daksh
 $ uv pip install -e .
 $ daksh --help
 ```
