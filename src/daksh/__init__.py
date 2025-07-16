@@ -14,6 +14,5 @@ __email__ = 'yeshwanth@divami.com'
 __version__ = '0.1.0'
 
 from .__pre_init__ import cli
-from . import health
-
-from . import io
+from .health import *
+from .update_prompts import *
