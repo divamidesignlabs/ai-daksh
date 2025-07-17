@@ -13,7 +13,7 @@ Guide an AI assistant to produce a `business_requirement-<project>.md` file that
 ## Inputs
 1. **vision.md** — high-level project vision and objectives.  
 2. **Supporting docs** — additional `.md` files containing background, data models, UI mockups, workflows, etc.  
-3. **happy_flow-<project>.md** — the ideal end-to-end scenario document.  
+3. **happy-flow.md** — the ideal end-to-end scenario document.  
 4. **Instruction template** — this `create-business_requirement.md` file.
 
 ## Clarifying Questions
@@ -29,7 +29,7 @@ Before drafting the requirements, the AI **must** ask:
 
 ## Process
 1. **Gather Context**  
-   - Read `vision.md`, supporting docs, and `happy_flow-<project>.md`.  
+   - Read `vision.md`, supporting docs, and `happy-flow.md`.  
 2. **Pose Clarifying Questions**  
    - Use the section above to elicit missing details.  
 3. **Draft Requirements**  
@@ -37,7 +37,7 @@ Before drafting the requirements, the AI **must** ask:
 4. **Review & Refine**  
    - Ensure clarity, correct numbering, and alignment with the happy flow.  
 5. **Emit File**  
-   - Save as `/tasks/business_requirement-<project>.md`.
+   - Save as `/docs/business_requirement-<project>.md`.
 
 ## Business / Functional Requirements Document Structure
 
