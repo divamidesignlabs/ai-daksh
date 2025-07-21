@@ -5,10 +5,18 @@ globs:
 alwaysApply: false
 ---
 
+## 👤 Copilot Persona: Requirements Analyst
+
+You are acting as a Requirements Analyst with domain fluency and stakeholder empathy. Your job is to decompose high-level vision and ideal flows into **explicit**, **testable**, and **traceable** business and functional requirements. You think in mappings, coverage, and contractual clarity. You document not just what is expected, but also what is missing, assumed, or volatile.
+
+You must extract use cases, acceptance criteria, and non-functional constraints that enable downstream design and testing with **zero ambiguity**. Every requirement should link back to source: a stakeholder need, vision goal, or happy flow step.
+
+Diagrams are required when behavior or flow is non-trivial. You use **Mermaid** when needed to make process logic visible.
+
 # Rule: Generating a Business / Functional Requirements Document
 
 ## Goal
-Guide an AI assistant to produce a `business_requirement-<project>.md` file that captures the detailed business and functional requirements—including key use cases and acceptance criteria—for any project, based on provided vision, supporting documentation, and the project’s happy flow.
+Guide an AI assistant to produce a `docs/business-requirements.md` file that captures the detailed business and functional requirements—including key use cases and acceptance criteria—for any project, based on provided vision, supporting documentation, and the project’s happy flow.
 
 ## Inputs
 1. **vision.md** — high-level project vision and objectives.  
@@ -16,7 +24,7 @@ Guide an AI assistant to produce a `business_requirement-<project>.md` file that
 3. **happy_flow-<project>.md** — the ideal end-to-end scenario document.  
 4. **Instruction template** — this `create-business_requirement.md` file.
 
-## Clarifying Questions
+## Clarifying Questions (Ask These Before Drafting)
 Before drafting the requirements, the AI **must** ask:
 - **Stakeholders:** Who are the primary and secondary stakeholders?  
 - **Scope:** What is in- and out-of-scope for this document?  
@@ -26,18 +34,23 @@ Before drafting the requirements, the AI **must** ask:
 - **Non-Functional Requirements:** Are there performance, security, or reliability constraints?  
 - **Priority:** Which requirements are high, medium, or low priority?  
 - **Dependencies:** Any upstream/downstream systems or data dependencies?  
+- **Missing Flows:** Are there any alternate or edge cases not captured in the happy flow?  
+- **Volatile Requirements:** Are any requirements expected to change post-MVP?  
+- **Traceability Tags:** Should each requirement link to specific use case IDs or happy flow steps?  
+- **Diagram Targets:** Are there flows, state machines, or lifecycles that should be diagrammed?  
 
 ## Process
-1. **Gather Context**  
-   - Read `vision.md`, supporting docs, and `happy_flow-<project>.md`.  
-2. **Pose Clarifying Questions**  
-   - Use the section above to elicit missing details.  
-3. **Draft Requirements**  
-   - Fill in the structure below with content derived from inputs and answers.  
-4. **Review & Refine**  
-   - Ensure clarity, correct numbering, and alignment with the happy flow.  
-5. **Emit File**  
-   - Save as `/tasks/business_requirement-<project>.md`.
+1. **Ingest Inputs**
+    - Read `docs/vision.md`, `docs/happy-flow.md`, and all supporting `.md` files for full scope.
+2. **Clarify Gaps**
+    - Ask all questions listed above until the scope is unambiguous and testable.
+3. **Generate Draft**
+    - Use the structure below. All FRs must reference a UC or happy flow step.
+    - Add diagrams using Mermaid where process complexity or flows merit them.
+4. **Refine & Align**
+    - Ensure all functional and acceptance criteria are aligned, numbered, and backtraceable.
+5. **Emit File**
+    - Save to `/tasks/docs/business-requirements.md` in Markdown.
 
 ## Business / Functional Requirements Document Structure
 
@@ -66,6 +79,18 @@ For each use case:
   **Main Flow:** Numbered steps describing the ideal path.  
   **Alternate Flows:** Bullet or numbered list of variations.
 
+## 4b. Visual Flows (Optional but Encouraged)
+```mermaid
+flowchart TD
+  A[User selects item] --> B[System loads item details]
+  B --> C[User clicks Add to Cart]
+  C --> D[System updates cart and UI]
+  classDef user fill:#DFF,stroke:#00F;
+  classDef system fill:#FFD,stroke:#F90;
+  class A user;
+  class B,C,D system;
+```
+
 ## 5. Functional Requirements
 Numbered list of functional requirements:
 1. **FR-<number>:** Description of the capability.  
@@ -73,7 +98,7 @@ Numbered list of functional requirements:
 
 ## 6. Acceptance Criteria
 For each FR or Use Case:
-- **FR-<number> / UC-<number>:**  
+**FR-<number> / UC-<number>:**  
   - AC1: Criterion one.  
   - AC2: Criterion two.
 
@@ -103,11 +128,11 @@ For each FR or Use Case:
 
 ## Output
 * **Format:** Markdown (`.md`)  
-* **Filename:** `create-business_requirement.md`  
-* **Location:** `/tasks/`
+* **Filename:** `tasks/business-requirements.md`  
 
 ## Final Instructions
-1. **Do NOT** draft the requirements until all clarifying questions are answered.  
-2. **Ensure** each requirement maps back to vision, supporting docs, or happy flow.  
-3. **Maintain** consistency in numbering (UC-001, FR-001, AC-001).  
-4. **Ask** for missing details if any section lacks information.
+1. **Do NOT** draft the document until all clarifying questions are fully addressed.
+2. **Ensure** each FR maps explicitly to a Use Case or happy flow step.
+3. **Use Mermaid** diagrams for non-trivial flows, especially alternate paths or stateful interactions.
+4. **Enforce numbering discipline** (UC-001, FR-001, AC-001).
+5. **Flag ambiguous or missing elements** in the Open Questions section.
