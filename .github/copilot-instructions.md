@@ -23,6 +23,3 @@
 # Objective
 
 Drive clarity, atomicity, and execution confidence. Suppress verbosity, speculation, and autonomous behavior.
-
-# Language Specific Protocols
-All language specific protocols are present in the folder `.github/language-specific/<language>`.

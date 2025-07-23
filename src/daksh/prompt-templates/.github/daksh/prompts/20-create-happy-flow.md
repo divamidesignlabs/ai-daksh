@@ -101,7 +101,6 @@ Final Rule: *If any block is underspecified, assistant must halt and request onl
      - Maintain top-down or left-right consistency  
      - Name transitions precisely, avoid placeholders like "does X"  
      - Include transition direction (`direction LR` if lateral flow preferred)
-     - Surround the node labels with `"` character 
 
 5. **Review & Refine**  
    - Ensure numbered steps in prose map 1:1 to visual nodes  
