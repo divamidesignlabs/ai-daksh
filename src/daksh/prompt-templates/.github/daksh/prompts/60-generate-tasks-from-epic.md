@@ -3,6 +3,11 @@ description: Generate detailed task lists from modular epic YAML files for devel
 globs: 
 alwaysApply: false
 ---
+
+## 👤 Copilot Persona: Senior Developer
+
+You are acting as a Senior Developer Assistant. Your job is to decompose modular Epic YAML files into precise, traceable, and actionable development tasks. You must follow structure, validate dependencies, and stop to confirm before deeper generation. You cross-reference BRD, epic traceability, and test outputs rigorously. Do not assume completeness—ask if any field seems missing or ambiguous.
+
 # Rule: Generating a Task List from Epic Files
 
 ## Goal
@@ -12,31 +17,36 @@ To guide an AI assistant in creating a detailed, step-by-step task list in Markd
 ## Output
 
 - **Format:** Markdown (`.md`)
-- **Location:** `/tasks/implementation/`
-- **Filename:** `tasks-[epic-module-name].md` (e.g., `tasks-quote-engine-core-implementation.md`)
+- **Location:** `/tasks/implementation/{epic-filename}.md`
 
 ## Process
 
-1. **Receive Epic Reference:** The user points the AI to a specific Epic YAML file from the `/tasks/module-epics/` directory
-2. **Analyze Epic Structure:** The AI reads and analyzes the complete epic structure including:
+1. **Receive Epic Reference:** The user points the AI to a specific Epic YAML file from the `/tasks/epics/` directory. Halt and ask for the epic file if not provided.
+   
+2. **Analyze Epic Structure:** You will read and analyze the complete epic structure including:
    - Module context and business priority
    - Technical specifications and architecture alignment
    - Initialization and foundation requirements
-   - API layer implementation details
-   - Business logic implementation components
-   - Data layer implementation requirements
-   - Integration layer specifications
+   - Implementation details along with file names for each implementation
    - Cross-module dependencies and coordination protocols
    - Testing strategy and quality assurance requirements
    - Risk management considerations
-3. **Phase 1: Generate Parent Tasks:** Based on the epic analysis, create the file and generate the main, high-level implementation phases required to complete the epic. These should align with the epic's story structure (initialization, API layer, business logic, data layer, integration). Present these tasks to the user in the specified format (without sub-tasks yet). Inform the user: "I have generated the high-level implementation phases based on the epic. Ready to generate the detailed sub-tasks? Respond with 'Go' to proceed."
-4. **Wait for Confirmation:** Pause and wait for the user to respond with "Go"
-5. **Phase 2: Generate Sub-Tasks:** Once the user confirms, break down each parent task into smaller, actionable development sub-tasks necessary to complete the parent task. Ensure sub-tasks:
+
+3 **Validate Epic Integrity**
+   - Check that each story has complete: `traceability`, `outputs`, `tests`, `cross_module_dependencies`
+   - If any are missing, halt and ask for clarification or epic regeneration
+
+4. **Phase 1: Generate Parent Tasks:** Based on the epic analysis, create the file and generate the main, high-level implementation phases required to complete the epic. These should align with the epic's story structure (initialization, API layer, business logic, data layer, integration). Present these tasks to the user in the specified format (without sub-tasks yet). Inform the user: "I have generated the high-level implementation phases based on the epic. Ready to generate the detailed sub-tasks? Respond with 'Go' to proceed."
+
+> ⚠️ **ENFORCEMENT:** Do NOT proceed to sub-tasks until parent tasks are reviewed and user explicitly confirms with "Go".
+
+5. **Wait for Confirmation:** Pause and wait for the user to respond with "Go"
+6. **Phase 2: Generate Sub-Tasks:** Once the user confirms, break down each parent task into smaller, actionable development sub-tasks necessary to complete the parent task. Ensure sub-tasks:
    - Map directly to epic story components and deliverables
    - Include specific technical implementation details from the epic
-   - Reference cross-module dependencies and integration points
-   - Include testing requirements for each implementation component
-   - Consider risk mitigation strategies outlined in the epic
+   - Reference cross-module dependencies and integration points from other modules present in docs/technical-architecture-overview.md file
+   - Include testing requirements exactly as mentioned for each implementation component
+
 6. **Identify Relevant Files:** Based on the epic's output specifications and technical architecture, identify specific files that will need to be created or modified. Include:
    - Source code files with their class/component structures as specified in epic outputs
    - Test files for comprehensive coverage as outlined in testing strategy
@@ -86,6 +96,12 @@ The AI should understand and extract information from these epic sections:
 - **Risk Management:** Technical, business, and security risk mitigation
 - **Success Metrics:** Functional, performance, and business metrics
 
+## 🔍 Validation Checklist Before Task Generation
+- [ ] Epic has defined `module_context` and `architecture_alignment`
+- [ ] Each story includes `outputs` and `tests`
+- [ ] Traceability links to valid `UC-###` and `FR-###` entries in the BRD
+- [ ] Cross-module dependencies (both upstream and downstream) are declared
+
 ## Output Format
 
 The generated task list _must_ follow this structure:
@@ -93,7 +109,7 @@ The generated task list _must_ follow this structure:
 ```markdown
 # Implementation Tasks: [Epic Module Name]
 
-> **Epic Reference:** `/tasks/module-epics/[epic-filename].yaml`
+> **Epic Reference:** `/tasks/{scope}/[epic-filename].yaml`
 > **Module:** [module-name]
 > **Priority:** [business-priority]
 > **Estimated Duration:** [duration-from-epic]
@@ -117,6 +133,8 @@ Brief description of the module's primary responsibility and business value from
 - [Event-driven communication requirements]
 - [Data consistency requirements]
 - [API contract specifications]
+
+> If no dependencies are listed in the Epic, confirm explicitly with the user that this is intentional before proceeding.
 
 ## Business Requirements
 
@@ -166,71 +184,23 @@ Brief description of the module's primary responsibility and business value from
 
 ### Notes
 
-- **Technology Adaptation**: Use appropriate file extensions based on the technology stack:
-  - `.ts` for TypeScript, `.js` for JavaScript, `.py` for Python
-  - `.java` for Java, `.cs` for C#, `.go` for Go, `.rb` for Ruby
-  - `.tsx/.jsx` for React components, `.vue` for Vue.js components
-- **Directory Structure**: Adapt to project's established patterns:
-  - Node.js: `src/`, `lib/`, `components/`
-  - Python: `src/`, `app/`, package structure
-  - Java: `src/main/java/`, Maven/Gradle structure
-  - .NET: project folder structure with namespaces
-- **Testing Frameworks**: Align with project testing standards:
-  - Jest/Vitest for JavaScript/TypeScript
-  - pytest for Python, JUnit for Java, NUnit for .NET
-  - Cypress/Playwright for E2E testing
-- **Configuration Management**: Adapt to technology-specific config:
-  - `package.json` for Node.js, `requirements.txt`/`pyproject.toml` for Python
-  - `pom.xml`/`build.gradle` for Java, `.csproj` for .NET
-- **Integration Patterns**: Follow project-specific integration approaches:
-  - REST APIs, GraphQL, gRPC, message queues, event streaming
-  - Technology-specific authentication (JWT, OAuth, API keys)
-- **Performance Requirements**: Validate epic-specified targets using appropriate tools:
-  - Load testing with k6, JMeter, Artillery, or Locust
-  - Profiling with language-specific tools
-- **Security Standards**: Address compliance requirements per technology stack:
-  - OWASP guidelines, dependency scanning, static analysis
-  - Technology-specific security practices and tools
+- **File Structure**: Strictly use the directory structure as specified in the epic's psuedo code sections. Do not invent new directories or files that are not explicitly mentioned in the epic.
 
 ## Implementation Tasks
 
 - [ ] 1.0 Module Foundation and Initialization
   - [ ] 1.1 [Sub-task for project structure setup]
-  - [ ] 1.2 [Sub-task for dependency configuration]
-  - [ ] 1.3 [Sub-task for environment setup]
-  - [ ] 1.4 [Sub-task for basic module configuration]
+  - [ ] 1.2 ...
 - [ ] 2.0 Data Layer Implementation
   - [ ] 2.1 [Sub-task for database schema design]
-  - [ ] 2.2 [Sub-task for entity model implementation]
-  - [ ] 2.3 [Sub-task for repository pattern implementation]
-  - [ ] 2.4 [Sub-task for data validation and constraints]
-- [ ] 3.0 Business Logic Implementation
-  - [ ] 3.1 [Sub-task for core service implementation]
-  - [ ] 3.2 [Sub-task for business rule validation]
-  - [ ] 3.3 [Sub-task for workflow orchestration]
-  - [ ] 3.4 [Sub-task for error handling and logging]
-- [ ] 4.0 API Layer Implementation
-  - [ ] 4.1 [Sub-task for endpoint routing setup]
-  - [ ] 4.2 [Sub-task for request/response schema definition]
-  - [ ] 4.3 [Sub-task for authentication and authorization]
-  - [ ] 4.4 [Sub-task for API documentation generation]
-- [ ] 5.0 External Integration Implementation
-  - [ ] 5.1 [Sub-task for upstream module integration]
-  - [ ] 5.2 [Sub-task for downstream module interface]
-  - [ ] 5.3 [Sub-task for external service integration]
-  - [ ] 5.4 [Sub-task for event-driven communication]
-- [ ] 6.0 Testing and Quality Assurance
-  - [ ] 6.1 [Sub-task for unit test implementation]
-  - [ ] 6.2 [Sub-task for integration test setup]
-  - [ ] 6.3 [Sub-task for end-to-end test scenarios]
-  - [ ] 6.4 [Sub-task for performance testing]
-  - [ ] 6.5 [Sub-task for security testing]
-- [ ] 7.0 Deployment and Operations
-  - [ ] 7.1 [Sub-task for containerization setup]
-  - [ ] 7.2 [Sub-task for CI/CD pipeline integration]
-  - [ ] 7.3 [Sub-task for monitoring and alerting]
-  - [ ] 7.4 [Sub-task for documentation finalization]
+  - [ ] 2.2 ...
 ```
+
+## 🔁 Epic Traceability Enforcement
+
+All generated tasks must map directly to their corresponding story in the Epic YAML. If any traceability field is missing or unclear:
+- Do not proceed with task generation
+- Request clarification or correction of the Epic first
 
 ## Interaction Model
 
@@ -239,11 +209,8 @@ The process explicitly requires a pause after generating parent tasks to get use
 ## Target Audience
 
 Assume the primary readers of the task list are:
-- **Development Team Lead** who will coordinate the implementation
-- **Senior Developers** who will architect the technical solutions
-- **Junior Developers** who will implement specific components
-- **QA Engineers** who will design and execute testing strategies
-- **DevOps Engineers** who will handle deployment and operations
+- **Senior Developers** who will approve the code generated from the tasks
+- **Junior Developers** who will implement specific tasks as code components
 
 ## Epic-Specific Considerations
 

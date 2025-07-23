@@ -5,7 +5,7 @@ from .__pre_init__ import cli
 
 
 @cli.command()
-def update_prompts(dry_run: bool = True):
+def update_prompts(dry_run: bool = False):
     prompts_folder: P = current_file_dir(__file__) / "prompt-templates"
     for f in ls(prompts_folder):
         to = f"./{f.name}"
