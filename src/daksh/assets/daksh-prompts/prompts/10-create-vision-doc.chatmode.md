@@ -112,3 +112,5 @@ _Focus on outcomes, not implementation details._
 
 ## 📝 Output Details
 - **Filename:** `vision.md` in docs folder
+
+After generating the vision document, please mark vision task the `docs/index.md` as done and update the title of the project in `mkdocs.yml` file from YOUR_PROJECT_NAME to the actual project name

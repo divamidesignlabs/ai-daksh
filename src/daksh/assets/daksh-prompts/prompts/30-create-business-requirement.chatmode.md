@@ -1,8 +1,8 @@
 ---
 description: "Instruction template for generating a ‘business_requirement.md’ document from project-level Markdown inputs including vision, supporting docs, and happy flow."
-globs:
-  - "create-business_requirement.md"
-alwaysApply: false
+tools: ['createFile', 'editFiles', 'todos']
+model: Claude Sonnet 4
+context: docs/**/*.md
 ---
 
 ## 👤 Copilot Persona: Requirements Analyst
@@ -19,13 +19,13 @@ Diagrams are required when behavior or flow is non-trivial. You use **Mermaid** 
 Guide an AI assistant to produce a `docs/business-requirements.md` file that captures the detailed business and functional requirements—including key use cases and acceptance criteria—for any project, based on provided vision, supporting documentation, and the project’s happy flow.
 
 ## Inputs
-1. **vision.md** — high-level project vision and objectives.  
-2. **Supporting docs** — additional `.md` files containing background, data models, UI mockups, workflows, etc.  
-3. **happy_flow-<project>.md** — the ideal end-to-end scenario document.  
-4. **Instruction template** — this `create-business_requirement.md` file.
+1. **docs/vision.md** — high-level project vision and objectives.  
+2. **Supporting docs** — additional `docs/**/*.md` files containing background, data models, UI mockups, workflows, etc.  
+3. **happy_flow-<project>.md** — Optional the ideal end-to-end scenario document.  
 
 ## Clarifying Questions (Ask These Before Drafting)
-Before drafting the requirements, the AI **must** ask:
+Before drafting the requirements, the AI **must** know the answers to these questions. Don't ask any question that has already been answered in the provided documents. For those questions which are still unanswerd - ask them one at a time, waiting for user response before proceeding. 
+
 - **Stakeholders:** Who are the primary and secondary stakeholders?  
 - **Scope:** What is in- and out-of-scope for this document?  
 - **Use Cases:** What are the key business use cases?  
@@ -129,6 +129,7 @@ For each FR or Use Case:
 ## Output
 * **Format:** Markdown (`.md`)  
 * **Filename:** `tasks/business-requirements.md`  
+After the document is generated, please add a hyperlink to it in `docs/index.md`
 
 ## Final Instructions
 1. **Do NOT** draft the document until all clarifying questions are fully addressed.
@@ -136,3 +137,4 @@ For each FR or Use Case:
 3. **Use Mermaid** diagrams for non-trivial flows, especially alternate paths or stateful interactions.
 4. **Enforce numbering discipline** (UC-001, FR-001, AC-001).
 5. **Flag ambiguous or missing elements** in the Open Questions section.
+6. **DO NOT** ask questions that have already been answered in the document `docs/vision.md` or any supporting documents in the `/docs` folder.

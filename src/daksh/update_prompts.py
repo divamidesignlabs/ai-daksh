@@ -1,4 +1,5 @@
-import shutil, json
+import shutil, json, os
+from datetime import datetime
 from pathlib import Path as P
 from .__pre_init__ import cli
 
@@ -27,6 +28,21 @@ def write_json(file: P, data: dict):
         json.dump(data, f, indent=4)
 
 
+def read_lines(file: P) -> list[str]:
+    with open(file, "r") as f:
+        return f.readlines()
+
+
+def append_lines(file: P, lines: list[str]):
+    if not file.parent.exists():
+        file.parent.mkdir(parents=True, exist_ok=True)
+    if not file.exists():
+        with open(file, "w") as f:
+            pass
+    with open(file, "a") as f:
+        f.writelines(lines)
+
+
 @cli.command()
 def update_prompts(dry_run: bool = False):
 
@@ -39,11 +55,12 @@ def update_prompts(dry_run: bool = False):
                 continue
 
             if f.is_file():
-                f.cp(to)
+                shutil.copy(f, to)
             elif f.is_dir():
                 shutil.copytree(f, to, dirs_exist_ok=True)
 
-    copy(current_file_dir(__file__) / "daksh-prompts", P(".daksh"))
+    cwd = current_file_dir(__file__)
+    copy(cwd / "assets/daksh-prompts", P(".daksh"))
 
     if P(".vscode/settings.json").exists():
         settings = read_json(P(".vscode/settings.json"))
@@ -54,3 +71,28 @@ def update_prompts(dry_run: bool = False):
     chat_mode_files_locations[".daksh/prompts"] = True
     settings["chat.modeFilesLocations"] = chat_mode_files_locations
     write_json(P(".vscode/settings.json"), settings)
+
+    if os.path.exists(".github/copilot-instructions.md"):
+        if (
+            input(
+                "Found an existing .github/copilot-instructions.md should we back it up? [y/n]: "
+            ).lower()
+            != "y"
+        ):
+            Info("Skipping backup")
+        else:
+            bkp = f".github/copilot-instructions.md.bak.{datetime.now().strftime('%Y%m%d%H%M%S')}"
+            Info(f"Backing up existing .github/copilot-instructions.md to {bkp}")
+            shutil.copy(".github/copilot-instructions.md", bkp)
+    if not os.path.exists(".github"):
+        os.makedirs(".github")
+    shutil.copy(
+        cwd / "assets/copilot-instructions.md", ".github/copilot-instructions.md"
+    )
+    shutil.copy(cwd / "assets/mkdocs.yml", "mkdocs.yml")
+    append_lines(P("makefile"), read_lines(cwd / "assets/makefile"))
+    os.makedirs("docs/overrides", exist_ok=True)
+    shutil.copy(cwd / "assets/extra.css", "docs/overrides/extra.css")
+    shutil.copytree(cwd / "assets/overrides", "./overrides", dirs_exist_ok=True)
+    if not os.path.exists("docs/index.md"):
+        shutil.copy(cwd / "assets/index.md", "docs/index.md")
