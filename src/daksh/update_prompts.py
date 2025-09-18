@@ -43,7 +43,7 @@ def update_prompts(dry_run: bool = False):
             elif f.is_dir():
                 shutil.copytree(f, to, dirs_exist_ok=True)
 
-    copy(current_file_dir(__file__) / "../../.daksh", P(".daksh"))
+    copy(current_file_dir(__file__) / "daksh-prompts", P(".daksh"))
 
     if P(".vscode/settings.json").exists():
         settings = read_json(P(".vscode/settings.json"))
