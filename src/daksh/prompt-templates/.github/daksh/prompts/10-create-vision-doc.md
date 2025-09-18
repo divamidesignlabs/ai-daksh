@@ -36,11 +36,17 @@ Guide an AI assistant to generate a structured, source-grounded Vision Document 
 ## 📐 Vision Document Structure
 
 ```markdown
-# Product Vision – [Product Name or Placeholder]
+# Product Vision
 
 ## 🚀 1. Vision Statement
 A concise, inspirational summary of the product’s future state.  
 _Focus on outcomes, not implementation details._
+
+### Owners
+
+| Role | Name | Email |
+| ---- | ---- | ----- |
+|      |      |       |
 
 ## 👤 2. Target Users / Personas
 - **Persona A:** 1–2 line description of role and needs.  

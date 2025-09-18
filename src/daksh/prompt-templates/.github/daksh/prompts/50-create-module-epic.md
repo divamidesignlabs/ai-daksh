@@ -441,6 +441,7 @@ tasks/epics/{scope}/{domain}-{subject}[.v{version}|.{yyyy-mm-dd}].yaml
 5. MUST use the enhanced YAML schema exactly as defined.
 6. MUST include the following required fields in every story:
    - story_id
+   - story_name
    - description
    - goals
    - acceptance_criteria

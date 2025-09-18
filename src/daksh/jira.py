@@ -119,6 +119,16 @@ class JiraClient:
         except Exception as e:
             self.handle_request_error(e)
 
+    def create_epic(self, project, summary, description="", labels=None):
+        """Create a new JIRA epic"""
+        return self.create_issue(
+            project=project,
+            issue_type="Epic",
+            summary=summary,
+            description=description,
+            labels=labels,
+        )
+
 
 jira_client = JiraClient()
 
@@ -190,3 +200,71 @@ def list(
         )
     ]
     print(AD(issues))
+
+
+@jira_cli.command()
+def create_epic(
+    project: str = typer.Option(..., "--project", "-p", help="Project key"),
+    summary: str = typer.Option(..., "--summary", "-s", help="Epic summary"),
+    description: str = typer.Option("", "--description", "-d", help="Epic description"),
+    labels: str = typer.Option(None, "--labels", help="Comma-separated labels"),
+):
+    """Create a new JIRA epic"""
+    try:
+        jira_client.create_epic(
+            project=project,
+            summary=summary,
+            description=description,
+            labels=labels,
+        )
+    except Exception as e:
+        typer.echo(f"❌ Unexpected error: {e}", err=True)
+        raise typer.Exit(1)
+
+
+@jira_cli.command()
+def create_story(
+    project: str = typer.Option(..., "--project", "-p", help="Project key"),
+    summary: str = typer.Option(..., "--summary", "-s", help="Story summary"),
+    epic_name: str = typer.Option(..., "--epic-name", help="Epic name (if any)"),
+    description: str = typer.Option(
+        "", "--description", "-d", help="Story description"
+    ),
+    labels: str = typer.Option(None, "--labels", help="Comma-separated labels"),
+):
+    """Create a new JIRA story"""
+    try:
+        jira_client.create_issue(
+            project=project,
+            issue_type="Story",
+            summary=summary,
+            description=description,
+            labels=labels,
+            parent=epic_name,
+        )
+    except Exception as e:
+        typer.echo(f"❌ Unexpected error: {e}", err=True)
+        raise typer.Exit(1)
+
+
+@jira_cli.command()
+def create_task(
+    project: str = typer.Option(..., "--project", "-p", help="Project key"),
+    summary: str = typer.Option(..., "--summary", "-s", help="Task summary"),
+    description: str = typer.Option("", "--description", "-d", help="Task description"),
+    labels: str = typer.Option(None, "--labels", help="Comma-separated labels"),
+    story_name: str = typer.Option(..., "--story-name", help="Story name (if any)"),
+):
+    """Create a new JIRA task"""
+    try:
+        jira_client.create_issue(
+            project=project,
+            issue_type="Task",
+            summary=summary,
+            description=description,
+            labels=labels,
+            parent_name=story_name,
+        )
+    except Exception as e:
+        typer.echo(f"❌ Unexpected error: {e}", err=True)
+        raise typer.Exit(1)

@@ -114,7 +114,7 @@ Final Rule: *If any block is underspecified, assistant must halt and request onl
 
 ## Happy Flow Document Structure
 
-# 🌈 Happy Flow: <Project Name>
+# Happy Flow
 
 ## 1. Purpose
 One- or two-sentence statement of the ideal outcome.

@@ -55,7 +55,7 @@ Before drafting the requirements, the AI **must** ask:
 ## Business / Functional Requirements Document Structure
 
 ```markdown
-# 📄 Business & Functional Requirements: <Project Name>
+# Business & Functional Requirements
 
 ## 1. Purpose
 One- or two-sentence description of the document’s intent.

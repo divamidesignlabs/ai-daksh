@@ -138,7 +138,7 @@ Example interaction style:
 ### High-Level Architecture Specification: `docs/technical-architecture-overview.md`
 
 <markdown>
-# 🛠 Technical Specifications Overview: <Project Name>
+# Technical Specifications Overview
 
 ## 1. System Overview
 A concise description of the system's purpose, stakeholders, and high‑level goals.

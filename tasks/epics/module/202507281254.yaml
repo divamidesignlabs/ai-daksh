@@ -1,0 +1,672 @@
+jira-cli-enhancement:
+  meta:
+    description: Enhance the Jira CLI module with complete command implementation based on specification
+    project_context:
+      project_type: Pure CLI
+      technology_stack: Python
+      architecture_pattern: Monolithic
+    module_context:
+      primary_module: jira-cli
+      related_modules:
+        - configuration-management
+        - error-handling
+      technical_spec_reference: docs/jira-cli.md
+      architecture_alignment:
+        - presentation-layer
+        - service-layer
+        - external-integrations
+      business_priority: high-priority
+
+  setup-core-cli-infrastructure:
+    story_id: 1
+    business_value: Provides foundational CLI structure for all subsequent Jira operations
+    description: Establish core CLI infrastructure and shared utilities for Jira commands
+    goals:
+      - as a developer I need a robust CLI foundation to build upon
+      - as a system architect I need proper error handling and configuration management
+      - as a user I need consistent command structure and help documentation
+    acceptance_criteria:
+      - CLI foundation supports all planned Jira commands
+      - Error handling is consistent across all operations
+      - Help documentation is auto-generated and comprehensive
+      - Configuration management handles credentials securely
+    dependent_stories: []
+    traceability:
+      use_cases: [UC-CLI-001, UC-CLI-002]
+      functional_requirements: [FR-CLI-001, FR-CLI-002]
+    relevant_docs:
+      - docs/jira-cli.md
+      - src/daksh/jira.py
+    cross_module_dependencies:
+      upstream:
+        # No dependencies – validate if this is intentional
+      downstream:
+        configuration-module:
+          dependency: Environment variable and credential management
+          interface: Python environment variables and dotenv loading
+    risk_mitigation: Establishes solid foundation reducing technical debt in future development
+    outputs:
+      src/daksh/jira.py:
+        classes:
+          JiraClient:
+            attributes:
+              - server: "str: Jira server URL"
+              - email: "str: User email for authentication"
+              - token: "str: API token for authentication"
+              - jira: "JIRA: Python JIRA library client instance"
+            methods:
+              - handle_request_error: >
+                  def handle_request_error(self, e: Exception) -> None:
+                      """
+                      Enhanced error handling for JIRA API requests
+                      Provides detailed error messages and exit codes
+                      """
+              - validate_connection: >
+                  def validate_connection(self) -> bool:
+                      """
+                      Validate JIRA connection and credentials
+                      Returns True if connection is successful
+                      """
+    tests:
+      tests/test_jira_cli.py:
+        classes:
+          TestJiraClient:
+            methods:
+              - test_client_initialization: >
+                  def test_client_initialization():
+                      """Test JiraClient initialization with valid credentials"""
+              - test_error_handling: >
+                  def test_error_handling():
+                      """Test comprehensive error handling for various API failures"""
+              - test_connection_validation: >
+                  def test_connection_validation():
+                      """Test JIRA server connection validation"""
+
+  implement-issue-view-command:
+    story_id: 2
+    business_value: Enables users to view detailed issue information directly from CLI
+    description: Implement comprehensive issue viewing with formatted output
+    goals:
+      - as a developer I need to quickly view issue details without opening browser
+      - as a team member I need to see issue status, assignee, and description
+      - as a project manager I need to view issue metadata and relationships
+    acceptance_criteria:
+      - View command displays all relevant issue fields
+      - Output is properly formatted and readable
+      - Command handles invalid issue keys gracefully
+      - Supports both summary and detailed view modes
+    dependent_stories: [1]
+    traceability:
+      use_cases: [UC-VIEW-001, UC-VIEW-002]
+      functional_requirements: [FR-VIEW-001, FR-VIEW-002]
+    relevant_docs:
+      - docs/jira-cli.md
+    cross_module_dependencies:
+      upstream:
+        jira-api-integration:
+          dependency: JIRA REST API for issue retrieval
+          interface: Python JIRA library methods
+      downstream:
+        # No dependencies – validate if this is intentional
+    risk_mitigation: Provides essential read functionality reducing need for web interface access
+    outputs:
+      src/daksh/jira.py:
+        functions:
+          - view_issue: >
+              @jira_cli.command()
+              def view(issue_key: str, detailed: bool = False):
+                  """
+                  View comprehensive issue details with formatted output
+                  Supports both summary and detailed view modes
+                  """
+          - format_issue_output: >
+              def format_issue_output(issue, detailed: bool = False) -> str:
+                  """
+                  Format issue data for terminal display
+                  Returns formatted string representation
+                  """
+    tests:
+      tests/test_jira_commands.py:
+        classes:
+          TestViewCommand:
+            methods:
+              - test_view_valid_issue: >
+                  def test_view_valid_issue():
+                      """Test viewing a valid issue key returns proper output"""
+              - test_view_invalid_issue: >
+                  def test_view_invalid_issue():
+                      """Test viewing invalid issue key handles error gracefully"""
+              - test_detailed_view_mode: >
+                  def test_detailed_view_mode():
+                      """Test detailed view mode shows additional information"""
+
+  implement-issue-edit-command:
+    story_id: 3
+    business_value: Allows users to modify issue fields without web interface
+    description: Implement issue editing capabilities for common field updates
+    goals:
+      - as a developer I need to update issue fields from command line
+      - as a project manager I need to modify assignee, priority, and status
+      - as a team lead I need to update descriptions and summaries
+    acceptance_criteria:
+      - Edit command supports all major issue fields
+      - Field validation prevents invalid updates
+      - Changes are confirmed before applying
+      - Command provides clear success/failure feedback
+    dependent_stories: [1, 2]
+    traceability:
+      use_cases: [UC-EDIT-001, UC-EDIT-002]
+      functional_requirements: [FR-EDIT-001, FR-EDIT-002]
+    relevant_docs:
+      - docs/jira-cli.md
+    cross_module_dependencies:
+      upstream:
+        jira-api-integration:
+          dependency: JIRA REST API for issue updates
+          interface: Python JIRA library update methods
+      downstream:
+        validation-module:
+          dependency: Field validation and data integrity
+          interface: Python validation functions
+    risk_mitigation: Enables efficient issue management reducing context switching to web interface
+    outputs:
+      src/daksh/jira.py:
+        functions:
+          - edit_issue: >
+              @jira_cli.command()
+              def edit(issue_key: str, **kwargs):
+                  """
+                  Edit issue fields with validation and confirmation
+                  Supports summary, description, assignee, priority updates
+                  """
+          - validate_field_updates: >
+              def validate_field_updates(issue, updates: dict) -> bool:
+                  """
+                  Validate field updates against JIRA schema
+                  Returns True if all updates are valid
+                  """
+    tests:
+      tests/test_jira_commands.py:
+        classes:
+          TestEditCommand:
+            methods:
+              - test_edit_valid_fields: >
+                  def test_edit_valid_fields():
+                      """Test editing valid issue fields succeeds"""
+              - test_edit_invalid_fields: >
+                  def test_edit_invalid_fields():
+                      """Test editing with invalid data fails gracefully"""
+              - test_field_validation: >
+                  def test_field_validation():
+                      """Test field validation prevents invalid updates"""
+
+  implement-comment-command:
+    story_id: 4
+    business_value: Enables team communication directly through CLI interface
+    description: Implement comment addition with support for visibility controls
+    goals:
+      - as a developer I need to add comments to issues from command line
+      - as a team member I need to communicate progress and blockers
+      - as a project manager I need to control comment visibility
+    acceptance_criteria:
+      - Comment command adds text to specified issues
+      - Supports comment visibility controls (public/private)
+      - Multi-line comments are properly formatted
+      - Command provides confirmation of comment addition
+    dependent_stories: [1]
+    traceability:
+      use_cases: [UC-COMMENT-001, UC-COMMENT-002]
+      functional_requirements: [FR-COMMENT-001, FR-COMMENT-002]
+    relevant_docs:
+      - docs/jira-cli.md
+    cross_module_dependencies:
+      upstream:
+        jira-api-integration:
+          dependency: JIRA REST API for comment creation
+          interface: Python JIRA library comment methods
+      downstream:
+        # No dependencies – validate if this is intentional
+    risk_mitigation: Facilitates team communication without requiring web interface access
+    outputs:
+      src/daksh/jira.py:
+        functions:
+          - add_comment: >
+              @jira_cli.command()
+              def comment(issue_key: str, text: str, visibility: str = None):
+                  """
+                  Add comment to issue with optional visibility controls
+                  Supports multi-line text and formatting
+                  """
+          - format_comment_text: >
+              def format_comment_text(text: str) -> str:
+                  """
+                  Format comment text for JIRA markdown
+                  Handles multi-line content and special characters
+                  """
+    tests:
+      tests/test_jira_commands.py:
+        classes:
+          TestCommentCommand:
+            methods:
+              - test_add_comment: >
+                  def test_add_comment():
+                      """Test adding comment to issue succeeds"""
+              - test_comment_visibility: >
+                  def test_comment_visibility():
+                      """Test comment visibility controls work correctly"""
+              - test_multiline_comments: >
+                  def test_multiline_comments():
+                      """Test multi-line comment formatting"""
+
+  implement-transition-command:
+    story_id: 5
+    business_value: Enables workflow state management from command line
+    description: Implement issue status transitions with workflow validation
+    goals:
+      - as a developer I need to move issues through workflow states
+      - as a team member I need to update issue status efficiently
+      - as a project manager I need to ensure workflow compliance
+    acceptance_criteria:
+      - Transition command changes issue status
+      - Available transitions are displayed for selection
+      - Workflow validation prevents invalid state changes
+      - Optional comment can be added during transition
+    dependent_stories: [1]
+    traceability:
+      use_cases: [UC-TRANSITION-001, UC-TRANSITION-002]
+      functional_requirements: [FR-TRANSITION-001, FR-TRANSITION-002]
+    relevant_docs:
+      - docs/jira-cli.md
+    cross_module_dependencies:
+      upstream:
+        jira-api-integration:
+          dependency: JIRA REST API for workflow transitions
+          interface: Python JIRA library transition methods
+      downstream:
+        workflow-validation:
+          dependency: Workflow state validation
+          interface: Python workflow validation functions
+    risk_mitigation: Ensures proper workflow compliance while enabling efficient status updates
+    outputs:
+      src/daksh/jira.py:
+        functions:
+          - transition_issue: >
+              @jira_cli.command()
+              def transition(issue_key: str, to: str = None, comment: str = None):
+                  """
+                  Transition issue to new status with optional comment
+                  Shows available transitions if target not specified
+                  """
+          - get_available_transitions: >
+              def get_available_transitions(issue) -> list:
+                  """
+                  Get list of available transitions for issue
+                  Returns formatted list of transition options
+                  """
+    tests:
+      tests/test_jira_commands.py:
+        classes:
+          TestTransitionCommand:
+            methods:
+              - test_valid_transition: >
+                  def test_valid_transition():
+                      """Test valid status transition succeeds"""
+              - test_invalid_transition: >
+                  def test_invalid_transition():
+                      """Test invalid transition is rejected"""
+              - test_list_transitions: >
+                  def test_list_transitions():
+                      """Test listing available transitions"""
+
+  implement-search-and-query-commands:
+    story_id: 6
+    business_value: Provides powerful issue discovery and filtering capabilities
+    description: Implement enhanced search with JQL support and filtering options
+    goals:
+      - as a developer I need to find issues using custom queries
+      - as a project manager I need to filter issues by various criteria
+      - as a team lead I need to search across projects and components
+    acceptance_criteria:
+      - Search command accepts raw JQL queries
+      - Enhanced list command with advanced filtering
+      - Results are paginated and properly formatted
+      - Search history is maintained for reuse
+    dependent_stories: [1]
+    traceability:
+      use_cases: [UC-SEARCH-001, UC-SEARCH-002]
+      functional_requirements: [FR-SEARCH-001, FR-SEARCH-002]
+    relevant_docs:
+      - docs/jira-cli.md
+    cross_module_dependencies:
+      upstream:
+        jira-api-integration:
+          dependency: JIRA REST API for issue search
+          interface: Python JIRA library search methods
+      downstream:
+        query-builder:
+          dependency: JQL query construction and validation
+          interface: Python JQL builder functions
+    risk_mitigation: Enables efficient issue discovery reducing time spent in web interface
+    outputs:
+      src/daksh/jira.py:
+        functions:
+          - search_issues: >
+              @jira_cli.command()
+              def search(query: str, limit: int = 50, fields: str = None):
+                  """
+                  Search issues using JQL with result formatting
+                  Supports custom field selection and pagination
+                  """
+          - enhanced_list: >
+              @jira_cli.command()
+              def list(project: str = None, status: str = None, assignee: str = None, **kwargs):
+                  """
+                  Enhanced list with multiple filtering options
+                  Builds JQL automatically from provided filters
+                  """
+    tests:
+      tests/test_jira_commands.py:
+        classes:
+          TestSearchCommands:
+            methods:
+              - test_jql_search: >
+                  def test_jql_search():
+                      """Test raw JQL search functionality"""
+              - test_filtered_list: >
+                  def test_filtered_list():
+                      """Test enhanced list with filtering options"""
+              - test_search_pagination: >
+                  def test_search_pagination():
+                      """Test search result pagination"""
+
+  implement-project-and-board-commands:
+    story_id: 7
+    business_value: Provides project and board navigation capabilities
+    description: Implement project listing, board viewing, and sprint management
+    goals:
+      - as a user I need to discover available projects and boards
+      - as a team member I need to view current sprint information
+      - as a project manager I need to access board and sprint data
+    acceptance_criteria:
+      - Projects command lists accessible projects
+      - Board command shows board configuration and issues
+      - Sprint command displays active sprint details
+      - Commands support multiple output formats
+    dependent_stories: [1]
+    traceability:
+      use_cases: [UC-PROJECT-001, UC-BOARD-001]
+      functional_requirements: [FR-PROJECT-001, FR-BOARD-001]
+    relevant_docs:
+      - docs/jira-cli.md
+    cross_module_dependencies:
+      upstream:
+        jira-api-integration:
+          dependency: JIRA REST API for project and board data
+          interface: Python JIRA library project/board methods
+      downstream:
+        # No dependencies – validate if this is intentional
+    risk_mitigation: Provides essential project navigation without requiring web interface
+    outputs:
+      src/daksh/jira.py:
+        functions:
+          - list_projects: >
+              @jira_cli.command()
+              def projects():
+                  """
+                  List all accessible projects with metadata
+                  Shows project keys, names, and types
+                  """
+          - view_board: >
+              @jira_cli.command()
+              def board(board_id: int = None):
+                  """
+                  View board information and current issues
+                  Lists boards if no ID specified
+                  """
+          - view_sprint: >
+              @jira_cli.command()
+              def sprint(board_id: int = None, include_done: bool = False):
+                  """
+                  View active sprint details and issues
+                  Optionally includes completed issues
+                  """
+    tests:
+      tests/test_jira_commands.py:
+        classes:
+          TestProjectCommands:
+            methods:
+              - test_list_projects: >
+                  def test_list_projects():
+                      """Test project listing functionality"""
+              - test_view_board: >
+                  def test_view_board():
+                      """Test board viewing with issue display"""
+              - test_sprint_details: >
+                  def test_sprint_details():
+                      """Test sprint information retrieval"""
+
+  implement-additional-issue-operations:
+    story_id: 8
+    business_value: Provides advanced issue management and navigation features
+    description: Implement browser integration, watching, cloning, and linking operations
+    goals:
+      - as a user I need to open issues in browser when needed
+      - as a team member I need to watch/unwatch issues for notifications
+      - as a developer I need to clone issues for similar work
+      - as a project manager I need to link related issues
+    acceptance_criteria:
+      - Open command launches browser with issue URL
+      - Watch command toggles issue watching status
+      - Clone command creates new issue from existing template
+      - Link command establishes relationships between issues
+    dependent_stories: [1, 2]
+    traceability:
+      use_cases: [UC-BROWSER-001, UC-WATCH-001, UC-CLONE-001]
+      functional_requirements: [FR-BROWSER-001, FR-WATCH-001, FR-CLONE-001]
+    relevant_docs:
+      - docs/jira-cli.md
+    cross_module_dependencies:
+      upstream:
+        jira-api-integration:
+          dependency: JIRA REST API for issue operations
+          interface: Python JIRA library advanced methods
+        browser-integration:
+          dependency: System browser launching capability
+          interface: Python webbrowser module
+      downstream:
+        # No dependencies – validate if this is intentional
+    risk_mitigation: Provides seamless integration between CLI and web interface when needed
+    outputs:
+      src/daksh/jira.py:
+        functions:
+          - open_in_browser: >
+              @jira_cli.command()
+              def open(issue_key: str):
+                  """
+                  Open issue in default web browser
+                  Constructs proper JIRA URL and launches browser
+                  """
+          - toggle_watch: >
+              @jira_cli.command()
+              def watch(issue_key: str):
+                  """
+                  Toggle watching status for specified issue
+                  Shows current watch status before and after
+                  """
+          - clone_issue: >
+              @jira_cli.command()
+              def clone(issue_key: str, summary: str = None):
+                  """
+                  Clone existing issue with new summary
+                  Copies fields and creates new issue
+                  """
+          - link_issues: >
+              @jira_cli.command()
+              def link(from_key: str, to_key: str, link_type: str = "relates to"):
+                  """
+                  Create link between two issues
+                  Supports various link types
+                  """
+    tests:
+      tests/test_jira_commands.py:
+        classes:
+          TestAdvancedOperations:
+            methods:
+              - test_browser_opening: >
+                  def test_browser_opening():
+                      """Test browser integration functionality"""
+              - test_watch_toggle: >
+                  def test_watch_toggle():
+                      """Test issue watching toggle"""
+              - test_issue_cloning: >
+                  def test_issue_cloning():
+                      """Test issue cloning with field copying"""
+              - test_issue_linking: >
+                  def test_issue_linking():
+                      """Test issue linking with various types"""
+
+  implement-file-and-work-management:
+    story_id: 9
+    business_value: Enables file attachment and work logging from command line
+    description: Implement file attachment upload and work time logging capabilities
+    goals:
+      - as a developer I need to attach files and screenshots to issues
+      - as a team member I need to log work time spent on issues
+      - as a project manager I need to track time and deliverables
+    acceptance_criteria:
+      - Attach command uploads files to specified issues
+      - Log command records work time with descriptions
+      - File validation prevents invalid attachments
+      - Work log entries include proper timestamps
+    dependent_stories: [1]
+    traceability:
+      use_cases: [UC-ATTACH-001, UC-WORKLOG-001]
+      functional_requirements: [FR-ATTACH-001, FR-WORKLOG-001]
+    relevant_docs:
+      - docs/jira-cli.md
+    cross_module_dependencies:
+      upstream:
+        jira-api-integration:
+          dependency: JIRA REST API for attachments and work logs
+          interface: Python JIRA library file and worklog methods
+        file-system:
+          dependency: Local file system access for attachments
+          interface: Python file I/O operations
+      downstream:
+        # No dependencies – validate if this is intentional
+    risk_mitigation: Enables complete issue management including file sharing and time tracking
+    outputs:
+      src/daksh/jira.py:
+        functions:
+          - attach_file: >
+              @jira_cli.command()
+              def attach(issue_key: str, file_path: str):
+                  """
+                  Upload file attachment to specified issue
+                  Validates file exists and size limits
+                  """
+          - log_work: >
+              @jira_cli.command()
+              def log(issue_key: str, time: str, comment: str = None, date: str = None):
+                  """
+                  Log work time against issue with optional comment
+                  Supports various time formats and date specification
+                  """
+          - validate_attachment: >
+              def validate_attachment(file_path: str) -> bool:
+                  """
+                  Validate file for attachment upload
+                  Checks existence, size, and type restrictions
+                  """
+    tests:
+      tests/test_jira_commands.py:
+        classes:
+          TestFileOperations:
+            methods:
+              - test_file_attachment: >
+                  def test_file_attachment():
+                      """Test file attachment upload functionality"""
+              - test_work_logging: >
+                  def test_work_logging():
+                      """Test work time logging with validation"""
+              - test_attachment_validation: >
+                  def test_attachment_validation():
+                      """Test file validation before upload"""
+
+  implement-configuration-management:
+    story_id: 10
+    business_value: Provides comprehensive CLI configuration and user management
+    description: Implement setup wizard, configuration management, and user information display
+    goals:
+      - as a new user I need guided setup for CLI configuration
+      - as an existing user I need to manage and view current settings
+      - as a developer I need to verify connection and authentication status
+    acceptance_criteria:
+      - Setup command provides interactive configuration wizard
+      - Config command shows and allows editing of current settings
+      - Me command displays current user information and permissions
+      - All commands handle authentication errors gracefully
+    dependent_stories: [1]
+    traceability:
+      use_cases: [UC-CONFIG-001, UC-SETUP-001]
+      functional_requirements: [FR-CONFIG-001, FR-SETUP-001]
+    relevant_docs:
+      - docs/jira-cli.md
+    cross_module_dependencies:
+      upstream:
+        jira-api-integration:
+          dependency: JIRA REST API for user information
+          interface: Python JIRA library user methods
+        configuration-storage:
+          dependency: Local configuration file management
+          interface: Python configuration file I/O
+      downstream:
+        # No dependencies – validate if this is intentional
+    risk_mitigation: Ensures proper CLI setup and configuration reducing user onboarding issues
+    outputs:
+      src/daksh/jira.py:
+        functions:
+          - setup_wizard: >
+              @jira_cli.command()
+              def setup():
+                  """
+                  Interactive setup wizard for CLI configuration
+                  Guides user through server, credentials, and defaults
+                  """
+          - config_management: >
+              @jira_cli.command()
+              def config(show: bool = False, set: str = None, value: str = None):
+                  """
+                  Show or modify CLI configuration settings
+                  Supports viewing and updating configuration values
+                  """
+          - user_info: >
+              @jira_cli.command()
+              def me():
+                  """
+                  Display current user information and permissions
+                  Shows authentication status and available projects
+                  """
+          - save_config: >
+              def save_config(config: dict) -> bool:
+                  """
+                  Save configuration to local storage
+                  Handles encryption of sensitive data
+                  """
+    tests:
+      tests/test_jira_commands.py:
+        classes:
+          TestConfigurationCommands:
+            methods:
+              - test_setup_wizard: >
+                  def test_setup_wizard():
+                      """Test interactive setup wizard functionality"""
+              - test_config_display: >
+                  def test_config_display():
+                      """Test configuration viewing and modification"""
+              - test_user_information: >
+                  def test_user_information():
+                      """Test user information retrieval and display"""
+              - test_config_persistence: >
+                  def test_config_persistence():
+                      """Test configuration saving and loading"""
