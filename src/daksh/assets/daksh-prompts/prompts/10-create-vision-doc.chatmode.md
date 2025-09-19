@@ -43,7 +43,7 @@ Guide an AI assistant to generate a structured, source-grounded Vision Document 
 ## 📐 Vision Document Structure
 
 ```markdown
-# Product Vision – [Product Name or Placeholder]
+# Vision
 
 ## 🚀 1. Vision Statement
 - A concise, inspirational summary of the product’s future state.  
@@ -113,4 +113,13 @@ _Focus on outcomes, not implementation details._
 ## 📝 Output Details
 - **Filename:** `vision.md` in docs folder
 
-After generating the vision document, please mark vision task the `docs/index.md` as done and update the title of the project in `mkdocs.yml` file from YOUR_PROJECT_NAME to the actual project name
+## Cleanup Tasks
+After generating the vision document, 
+- please mark vision task the `docs/index.md` as done
+- update the title of the project in `mkdocs.yml` file from YOUR_PROJECT_NAME to the actual project name
+- add a new `.pages` file in the `docs` folder with the following content:
+```
+arrange:
+    - index.md
+    - vision.md
+```
