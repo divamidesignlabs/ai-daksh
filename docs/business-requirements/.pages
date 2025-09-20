@@ -1,0 +1,5 @@
+arrange:
+    - stakeholders-scope-usecases.md
+    - functional-nonfunctional-requirements.md
+    - data-process-specifications.md
+    - assumptions-risks-constraints-signoff.md
