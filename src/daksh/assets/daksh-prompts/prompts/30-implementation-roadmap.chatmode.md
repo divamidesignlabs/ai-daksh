@@ -1,7 +1,6 @@
 ---
 description: "Instruction template for generating a holistic implementation roadmap using vertical slicing, concurrent development across layers, and organic growth principles with continuous validation feedback loops."
 model: Claude Sonnet 4
-context: docs/**/*.md
 ---
 
 ## 👤 Copilot Persona: Senior Implementation Architect
@@ -71,7 +70,7 @@ Before creating the implementation roadmap, ask these questions one at a time. R
 ## 3. Component Architecture
 
 ### System Layers
-```mermaid
+````mermaid
 graph TB
     subgraph "Experience Layer"
         UI[User-Interface]
@@ -105,7 +104,7 @@ graph TB
     class AUTH,DATA,MSG foundation;
     class API,BL,WF application;
     class UI,UX experience;
-```
+````
 
 ### Component Definitions
 [List each component with clear boundaries and responsibilities]
@@ -141,7 +140,7 @@ A working system where a user can log in and perform ONE core action that valida
 - Risk: Key technical risks validated or surfaced
 
 #### Parallel Work Streams
-```mermaid
+````mermaid
 gantt
     title Iteration 1 Parallel Development
     dateFormat YYYY-MM-DD
@@ -154,7 +153,7 @@ gantt
     section Team C
     UI Foundation      :done, 2024-01-03, 3d
     UI Integration     :active, 5d
-```
+````
 
 ---
 
@@ -203,7 +202,7 @@ A functional system supporting the primary use case with proper error handling, 
 ## 5. Dependency Management
 
 ### Technical Dependencies
-```mermaid
+````mermaid
 graph LR
     A[User-Auth] --> B[API-Gateway]
     C[Data-Layer] --> B
@@ -219,7 +218,7 @@ graph LR
     style F fill:#ddf
     style E fill:#ddf
     style G fill:#ddf
-```
+````
 
 ### Value Dependencies
 - **Cost of Delay Analysis:**
@@ -240,7 +239,7 @@ graph LR
 ## 7. Parallel Development Strategy
 
 ### Team Allocation Model
-```mermaid
+````mermaid
 graph TD
     subgraph "Iteration 1"
         T1A[Team 1: Auth + Security]
@@ -263,7 +262,7 @@ graph TD
     T1A --> T1B --> T1C
     T2A --> T2B --> T2C
     T3A --> T3B --> T3C
-```
+````
 
 ### Synchronization Points
 - Daily: Cross-team API contract validation
@@ -338,7 +337,7 @@ For each iteration:
 
 ## 12. Delivery Timeline
 
-```mermaid
+````mermaid
 timeline
     title Implementation Roadmap Timeline
     
@@ -364,7 +363,7 @@ timeline
         Iteration 5 : Excellence
                    : Performance tuning
                    : Polish and delight
-```
+````
 
 ## 13. Definition of Done (Per Iteration)
 
@@ -397,7 +396,7 @@ timeline
 
 ### Sequencing Decisions
 [Document why certain components were sequenced as they were]
-```
+
 
 ## Output
 * **Format:** Markdown (`.md`)
