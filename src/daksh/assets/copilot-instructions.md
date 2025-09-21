@@ -11,6 +11,9 @@
 - When you ask questions, ensure you provide with options numbered 1, 2, 3, etc., to make it easy for the developer to respond.
 - Pause after each output. Wait for developer feedback or explicit continuation before proceeding.
 
+# Formatting and Style
+- Use 4 spaces for indentation.
+- keep a new line before starting a list of bullets or numbered items.
 
 # Interaction Model
 
