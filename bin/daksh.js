@@ -31,6 +31,9 @@ function copyFileOrDir(src, dest) {
 }
 
 function updatePrompts(dryRun = false) {
+    // Track files that are created/copied
+    const addedFiles = [];
+    
     // Get the project root (where package.json is located)
     const projectRoot = path.dirname(__dirname);
     const assetsDir = path.join(projectRoot, 'assets');
@@ -45,7 +48,19 @@ function updatePrompts(dryRun = false) {
     const promptsDest = '.daksh';
 
     if (!dryRun) {
-        copyFileOrDir(promptsSource, promptsDest);
+        // Copy each subdirectory individually to track them
+        if (fs.existsSync(promptsSource)) {
+            if (!fs.existsSync(promptsDest)) {
+                fs.mkdirSync(promptsDest, { recursive: true });
+            }
+            const entries = fs.readdirSync(promptsSource);
+            for (const entry of entries) {
+                const srcPath = path.join(promptsSource, entry);
+                const destPath = path.join(promptsDest, entry);
+                copyFileOrDir(srcPath, destPath);
+                addedFiles.push(destPath);
+            }
+        }
     } else {
         info(`Would copy ${promptsSource} to ${promptsDest}`);
     }
@@ -72,6 +87,7 @@ function updatePrompts(dryRun = false) {
             fs.mkdirSync('.vscode', { recursive: true });
         }
         fs.writeFileSync(vscodePath, JSON.stringify(settings, null, 2));
+        addedFiles.push(vscodePath);
     } else {
         info(`Would update ${vscodePath}`);
     }
@@ -91,6 +107,7 @@ function updatePrompts(dryRun = false) {
                 const backup = `.github/copilot-instructions.md.bak.${timestamp}`;
                 info(`Backing up existing .github/copilot-instructions.md to ${backup}`);
                 fs.copyFileSync(copilotInstructions, backup);
+                addedFiles.push(backup);
             } else {
                 info('Skipping backup');
             }
@@ -111,19 +128,33 @@ function updatePrompts(dryRun = false) {
 
             // Copy files from assets
             fs.copyFileSync(path.join(assetsDir, 'copilot-instructions.md'), copilotInstructions);
+            addedFiles.push(copilotInstructions);
+            
             fs.copyFileSync(path.join(assetsDir, 'mkdocs.yml'), 'mkdocs.yml');
+            addedFiles.push('mkdocs.yml');
 
             // Copy CSS and overrides
             if (!fs.existsSync('docs/overrides')) {
                 fs.mkdirSync('docs/overrides', { recursive: true });
             }
             fs.copyFileSync(path.join(assetsDir, 'extra.css'), 'docs/overrides/extra.css');
+            addedFiles.push('docs/overrides/extra.css');
+            
             copyFileOrDir(path.join(assetsDir, 'overrides'), './overrides');
+            addedFiles.push('./overrides');
 
             // Copy index.md if it doesn't exist
             if (!fs.existsSync('docs/index.md')) {
                 fs.copyFileSync(path.join(assetsDir, 'index.md'), 'docs/index.md');
+                addedFiles.push('docs/index.md');
             }
+            
+            // Display summary of added files
+            console.log('\n📁 Files added to current working directory:');
+            addedFiles.forEach(file => {
+                console.log(`   ✓ ${file}`);
+            });
+            console.log(`\nTotal: ${addedFiles.length} files/directories added or updated\n`);
         } else {
             info('Dry run complete - no files were modified');
         }

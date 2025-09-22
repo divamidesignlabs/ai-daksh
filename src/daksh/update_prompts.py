@@ -45,6 +45,8 @@ def append_lines(file: P, lines: list[str]):
 
 @cli.command()
 def update_prompts(dry_run: bool = False):
+    # Track files that are created/copied
+    added_files = []
 
     def copy(src_fldr: P, dst_fldr: P):
         for f in ls(src_fldr):
@@ -56,8 +58,10 @@ def update_prompts(dry_run: bool = False):
 
             if f.is_file():
                 shutil.copy(f, to)
+                added_files.append(str(to))
             elif f.is_dir():
                 shutil.copytree(f, to, dirs_exist_ok=True)
+                added_files.append(str(to))
 
     # Try local assets first (for packaged version), then fall back to root assets (for development)
     cwd = current_file_dir(__file__)
@@ -86,6 +90,7 @@ def update_prompts(dry_run: bool = False):
     chat_mode_files_locations[".daksh/prompts"] = True
     settings["chat.modeFilesLocations"] = chat_mode_files_locations
     write_json(P(".vscode/settings.json"), settings)
+    added_files.append(".vscode/settings.json")
 
     if os.path.exists(".github/copilot-instructions.md"):
         if (
@@ -99,14 +104,30 @@ def update_prompts(dry_run: bool = False):
             bkp = f".github/copilot-instructions.md.bak.{datetime.now().strftime('%Y%m%d%H%M%S')}"
             Info(f"Backing up existing .github/copilot-instructions.md to {bkp}")
             shutil.copy(".github/copilot-instructions.md", bkp)
+            added_files.append(bkp)
     if not os.path.exists(".github"):
         os.makedirs(".github")
     shutil.copy(
         assets_dir / "copilot-instructions.md", ".github/copilot-instructions.md"
     )
+    added_files.append(".github/copilot-instructions.md")
+    
     shutil.copy(assets_dir / "mkdocs.yml", "mkdocs.yml")
+    added_files.append("mkdocs.yml")
+    
     os.makedirs("docs/overrides", exist_ok=True)
     shutil.copy(assets_dir / "extra.css", "docs/overrides/extra.css")
+    added_files.append("docs/overrides/extra.css")
+    
     shutil.copytree(assets_dir / "overrides", "./overrides", dirs_exist_ok=True)
+    added_files.append("./overrides")
+    
     if not os.path.exists("docs/index.md"):
         shutil.copy(assets_dir / "index.md", "docs/index.md")
+        added_files.append("docs/index.md")
+    
+    # Display summary of added files
+    print("\n📁 Files added to current working directory:")
+    for file in added_files:
+        print(f"   ✓ {file}")
+    print(f"\nTotal: {len(added_files)} files/directories added or updated\n")
