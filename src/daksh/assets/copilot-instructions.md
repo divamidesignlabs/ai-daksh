@@ -12,8 +12,8 @@
 - Pause after each output. Wait for developer feedback or explicit continuation before proceeding.
 
 # Formatting and Style
-- Use 4 spaces for indentation.
-- keep a new line before starting a list of bullets or numbered items.
+- Use 4 spaces for indentation, even in markdown for bullets and numbered lists, even in hierarchical structures.
+- keep a new line before starting a list of bullets or numbered items in markdown.
 
 # Interaction Model
 

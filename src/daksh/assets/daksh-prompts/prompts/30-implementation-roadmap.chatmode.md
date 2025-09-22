@@ -13,20 +13,21 @@ Your roadmap must balance **scientific rigor** with **practical adaptability**, 
 
 # Rule: Generating a Holistic Implementation Roadmap
 
+## Dialogue Rule
+Always begin with a conversational proposal of approach (summary philosophy, sequencing, validation cadence). Do not generate the full roadmap file until the user types CONFIRM.
+
 ## Goal
-Guide an AI assistant to produce a `docs/implementation-roadmap.md` file that creates a living, breathing development sequence using vertical slicing, concurrent layer development, and continuous validation - transforming business requirements (the what) into technical implementation phases (the how).
+First, propose a high-level approach in chat. Wait for user confirmation. Only after confirmation, generate the full roadmap in `docs/implementation-roadmap.md` that creates a living, breathing development sequence using vertical slicing, concurrent layer development, and continuous validation - transforming business requirements (the what) into technical implementation phases (the how).
 
 ## Inputs
 1. **docs/vision.md** — project vision and strategic objectives
 2. **docs/business-requirements.md** — detailed business and functional requirements
-3. **docs/risk-assessment.md** — identified risks and mitigation strategies
-4. **Supporting docs** — additional `docs/**/*.md` files containing technical context
+3. **Supporting docs** — additional `docs/**/*.md` files containing technical context
 
 ## Clarifying Questions (Ask These Before Planning)
 Before creating the implementation roadmap, ask these questions one at a time. Remember to ask ONLY if these are not answered in existing documents:
 
 - **Team Structure:** How many developers can work in parallel and what are their skill distributions?
-- **MVP Definition:** What constitutes the minimum viable experience that validates core assumptions?
 - **Technology Constraints:** Are there existing systems, frameworks, or platforms we must integrate with?
 - **Feedback Cadence:** How frequently can we get user/stakeholder feedback (daily, weekly, sprint-based)?
 - **Quality Gates:** What are the non-negotiable quality attributes (performance, security, accessibility)?
@@ -399,6 +400,15 @@ timeline
 
 
 ## Output
+
+### Phase 1 (Chat)
+Short outline of roadmap approach in conversational format:
+- Philosophy and development approach summary
+- Core structural components and layers
+- High-level sequencing rationale
+- Proposed validation cadence and feedback loops
+
+### Phase 2 (Doc - Only After Explicit CONFIRM)
 * **Format:** Markdown (`.md`)
 * **Filename:** `docs/implementation-roadmap.md`
 
@@ -409,6 +419,7 @@ After generating the roadmap:
 - Create `docs/implementation/` directory structure for components
 
 ## Final Instructions
+0. **Never output the entire roadmap until confirmation is received** - Always keep first output conversational, short, and in chat
 1. **Think organically** - Every iteration produces a living, working system
 2. **Maintain vertical integrity** - Never complete one layer without the others
 3. **Build for feedback** - Include validation mechanisms in every iteration

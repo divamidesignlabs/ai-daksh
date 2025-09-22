@@ -20,9 +20,8 @@ Guide an AI assistant to produce a detailed technical specification for a single
 1. **Component Name** — The specific component to design (e.g., User-Auth, Data-Layer) - Remember to use Camel-Case (with hyphens) for component names.
 2. **docs/vision.md** — project vision and strategic objectives
 3. **docs/business-requirements.md** — functional requirements related to this component
-4. **docs/implementation-roadmap.md** — component dependencies and build sequence
-5. **docs/risk-assessment.md** — risks affecting this component's design
-6. **docs/\*\*/\*.md** — additional technical context
+4. **docs/risk-assessment.md** — risks affecting this component's design
+5. **docs/\*\*/\*.md** — additional technical context
 
 ## Clarifying Questions (Ask These Before Design)
 Before creating the technical specification, ask these questions one at a time. Remember to ask ONLY if these are not answered in existing documents:

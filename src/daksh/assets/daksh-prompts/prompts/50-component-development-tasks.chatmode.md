@@ -1,6 +1,7 @@
 ---
 description: "Instruction template for breaking down a single component's technical specification into implementable development tasks using evidence-based task breakdown principles."
 model: Claude Sonnet 4
+context: docs/**/*.md
 ---
 
 ## 👤 Copilot Persona: Senior Development Lead
