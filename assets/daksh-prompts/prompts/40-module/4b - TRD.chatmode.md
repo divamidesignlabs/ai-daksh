@@ -14,42 +14,109 @@ Your specification must be concrete, actionable, and provide all the technical d
 # Rule: Generating a Component Technical Specification
 
 ## Goal
-Guide an AI assistant to produce a detailed technical specification for a single component identified in the implementation roadmap, creating a `docs/implementation/[COMPONENT-NAME]/technical-spec.md` file.
+Guide an AI assistant to produce a detailed technical specification for a single component identified in the implementation roadmap, creating a `docs/implementation/[COMPONENT-NAME]/phase-{N}-technical-spec.md` file.
 
 ## Inputs
 1. **Component Name** — The specific component to design (e.g., USER-AUTH, DATA-LAYER)
-2. **docs/vision.md** — project vision and strategic objectives
-3. **docs/business-requirements.md** — functional requirements related to this component
-4. **docs/implementation-roadmap.md** — component dependencies and build sequence
-5. **docs/risk-assessment.md** — risks affecting this component's design
-6. **docs/\*\*/\*.md** — additional technical context
+2. **Current Phase** — The implementation phase you're targeting (to be determined interactively)
+3. **docs/vision.md** — project vision and strategic objectives
+4. **docs/business-requirements.md** — functional requirements related to this component
+5. **docs/implementation-roadmap.md** — component dependencies and build sequence
+6. **docs/risk-assessment.md** — risks affecting this component's design
+7. **docs/\*\*/\*.md** — additional technical context
 
 ## Clarifying Questions (Ask These Before Design)
-Before creating the technical specification, ask these questions one at a time. Remember to ask ONLY if these are not answered in existing documents:
+Before creating the technical specification, you MUST ask these questions in this specific order:
 
-- **Component Scope:** What specific functionality should this component handle?
-- **Technology Stack:** Are there preferred frameworks, languages, or platforms?
-- **Performance Requirements:** What are the expected load, speed, and scalability needs?
-- **Security Requirements:** What security measures must be implemented?
-- **Integration Requirements:** How should this component communicate with dependencies?
-- **Data Requirements:** What data does this component need to store or process?
+1. **Component and Phase Identification:**
+   - "Which component do you need TRD for and what phase are you in?"
+   
+2. **Document Analysis and Context Extraction:**
+   - Read and analyze the provided documents (business-requirements.md, implementation-roadmap.md, vision.md, risk-assessment.md)
+   - Extract specific technical requirements for the requested component:
+     - What technical functionality is documented for this component?
+     - What performance requirements are specified?
+     - What integration points are mentioned?
+     - What data needs to be processed or stored?
+     - What security concerns are documented?
+     - What risks affect this component's design?
+   - Understand the component's technical purpose and constraints from the documentation
+
+3. **Interactive Phase Scope Definition (Based on Document Analysis):**
+   - Based on the extracted technical requirements and phase, suggest logical architecture scope
+   - If **Phase 1**: Suggest progressive technical scope options starting from core documented functionality
+   - If **Phase 2+**: Acknowledge what was likely implemented in previous phases and suggest logical technical additions from remaining documented requirements
+   - Present 3-4 numbered options derived from the actual documented technical needs
+   - Wait for user selection
+
+4. **Additional Context (Ask only if not clear from documents):**
+   - Technology Stack, Performance Requirements, Security Requirements, Integration Requirements, Data Requirements
+
+### TRD Phase Scope Interaction Examples
+
+**Greenfield Scenario (Phase 1) - AFTER analyzing documents:**
+```
+> Which component do you need TRD for and what phase are you in?
+< API Gateway and I'm in phase 1
+> Let me analyze the documents to understand API Gateway requirements...
+> [After reading docs] Based on your requirements, the API Gateway needs to handle requests to the user service and reporting service with basic security. For phase 1, I recommend implementing:
+1. Basic HTTP routing to user-service and report-service only
+2. Basic routing + JWT token validation for protected endpoints
+3. Basic routing + JWT validation + request/response logging
+4. Basic routing + JWT validation + logging + basic rate limiting
+Which technical scope would you like for this phase?
+```
+
+**Brownfield Scenario (Phase 2+):**
+```
+> Which component do you need TRD for and what phase are you in?
+< API Gateway and I'm in phase 2
+> You've already implemented phase 1 with basic HTTP routing. For phase 2, I recommend:
+1. Add request/response validation
+2. Validation + enhanced logging
+3. Validation + logging + monitoring
+4. Validation + logging + monitoring + caching
+Which technical additions would you like for phase 2?
+```
 
 ## Process
-1. **Extract Component Info** - Find component details from implementation roadmap
-2. **Gather Requirements** - Extract relevant functional requirements for this component
-3. **Identify Dependencies** - Understand what this component depends on and what depends on it
-4. **Design Technical Solution** - Create comprehensive technical specification
-5. **Generate Document** - Use the structure below
-6. **Create Folder Structure** - Save to appropriate component folder
+1. **Extract Component Info** - Read and thoroughly analyze all provided documents to understand component requirements
+2. **Document-Based Phase Scoping** - Determine current phase scope through user interaction based on actual documented requirements
+3. **Gather Requirements** - Extract relevant functional requirements for this component and agreed phase scope from documents
+4. **Identify Dependencies** - Understand what this component depends on and what depends on it from roadmap
+5. **Design Technical Solution** - Create comprehensive technical specification for agreed phase scope only, based on documented needs
+6. **Generate Document** - Use the structure below with phase-specific content
+7. **Create Folder Structure** - Save to appropriate component folder
+
+## Dynamic TRD Scoping Principles
+
+**The AI MUST analyze documents first, then intelligently suggest technical scope based on:**
+- **Documented technical requirements** - What the business-requirements.md and technical docs say about system needs
+- **Performance constraints** - What performance requirements are documented
+- **Security requirements** - What security measures are documented
+- **Integration needs** - What documented integration points exist
+- **Risk considerations** - What technical risks are documented in risk-assessment.md
+- **Architecture complexity** - Simple documented patterns before complex ones
+- **Technical dependencies** - What documented technical foundations must be built before other features can work
+- **Implementation risk** - Lower risk documented features first
+
+**Critical Rule: NEVER suggest technical architecture without first reading and understanding the component's documented requirements and constraints**
+
+**Technical scope suggestion principles:**
+- Phase 1: Simple documented architecture, basic documented patterns, minimal documented dependencies
+- Phase 2+: Add documented complexity incrementally (logging, monitoring, optimization)
+- Each phase should be technically sound and deployable based on documented needs
+- Avoid over-engineering - stick to documented technical requirements in early phases
 
 ## Component Technical Specification Structure
 
 ```markdown
-# Technical Specification
+# TRD - Phase {N}
 
 ## 1. Component Overview
 - **Purpose:** Brief description of what this component does
 - **Scope:** What functionality is included and excluded
+- **Phase {N} Scope:** What specific technical features are included in this phase
 - **Dependencies:** Components this depends on (from roadmap)
 - **Dependents:** Components that depend on this one (from roadmap)
 
@@ -217,7 +284,7 @@ Address specific risks identified in the risk assessment:
 
 ## Output
 * **Format:** Markdown (`.md`)
-* **Filename:** `docs/implementation/[COMPONENT-NAME]/technical-spec.md`
+* **Filename:** `docs/implementation/[COMPONENT-NAME]/phase-{N}-technical-spec.md`
 * **Folder Structure:** Create component folder if it doesn't exist
 * Update `docs/index.md` to link to the new technical specification
 
@@ -229,4 +296,5 @@ Address specific risks identified in the risk assessment:
 5. **Include Mermaid diagrams** for data flow and architecture
 6. **Be implementation-ready** - provide enough detail for developers to start coding
 7. **Focus on this single component** - don't design the entire system
-8. **Create the component folder** and save the specification file
+8. **STRICT TITLE FORMAT** - Document title must be exactly "TRD - Phase {N}" (no component name, no additional text)
+9. **Create the component folder** and save the specification file

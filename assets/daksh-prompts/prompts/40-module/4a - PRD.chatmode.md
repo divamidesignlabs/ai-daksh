@@ -14,46 +14,112 @@ Your specification must be detailed enough for developers to understand the prod
 # Rule: Generating a Module Product Specification
 
 ## Goal
-Guide an AI assistant to produce a module-specific product specification document saved as `docs/implementation/modules/[MODULE-NAME]/product-spec.md` that defines the product behavior and requirements for a single module identified in the implementation roadmap.
+Guide an AI assistant to produce a module-specific product specification document saved as `docs/implementation/[MODULE-NAME]/phase-{N}-product-spec.md` that defines the product behavior and requirements for a single module identified in the implementation roadmap.
 
 ## Inputs
+
 1. **Module Name** — The specific module to define (e.g., USER-AUTH, PAYMENT-PROCESSING, NOTIFICATION-SERVICE)
-2. **docs/business-requirements.md** — Project-wide business and functional requirements
-3. **docs/implementation-roadmap.md** — Module dependencies and build sequence context
-4. **docs/vision.md** — Project vision for strategic alignment
-5. **Supporting docs** — Additional context as needed
+2. **Current Phase** — The implementation phase you're targeting (to be determined interactively)
+3. **docs/business-requirements.md** — Project-wide business and functional requirements
+4. **docs/implementation-roadmap.md** — Module dependencies and build sequence context
+5. **docs/vision.md** — Project vision for strategic alignment
+6. **Supporting docs** — Additional context as needed
 
 ## Clarifying Questions (Ask These Before Design)
-Before creating the module product specification, ask these questions one at a time. Remember to ask ONLY if these are not answered in existing documents:
 
-- **Module Scope:** What specific user-facing functionality should this module provide?
-- **User Personas:** Which user types will interact with this module?
-- **Business Value:** What business objectives does this module support?
-- **Integration Points:** How should this module interact with other modules?
-- **Success Metrics:** How will we measure if this module is successful?
-- **Edge Cases:** What unusual scenarios should this module handle?
+Before creating the module product specification, you MUST ask these questions in this specific order:
+
+1. **Module and Phase Identification:**
+
+   - "Which module do you need PRD for and what phase are you in?"
+   
+2. **Document Analysis and Context Extraction:**
+
+   - Read and analyze the provided documents (business-requirements.md, implementation-roadmap.md, vision.md)
+   - Extract specific product requirements for the requested module:
+
+     - What user-facing functionality is documented for this module?
+     - What business value should this module provide?
+     - What user problems does it solve?
+     - Who are the intended users?
+     - What success metrics are mentioned?
+
+   - Understand the module's product purpose from the documentation
+
+3. **Interactive Phase Scope Definition (Based on Document Analysis):**
+
+   - Based on the extracted product requirements and phase, suggest logical feature scope
+   - If **Phase 1**: Suggest progressive feature scope options starting from core documented user journeys
+   - If **Phase 2+**: Acknowledge what features were likely implemented in previous phases and suggest logical additions from remaining documented requirements
+   - Present 3-4 numbered options derived from the actual documented user needs
+   - Wait for user selection
+
+4. **Additional Context (Ask only if not clear from documents):**
+
+   - User Personas, Business Value, Integration Points, Success Metrics, Edge Cases
+   - User Personas, Business Value, Integration Points, Success Metrics, Edge Cases
+
+### PRD Phase Scope Interaction Examples
+
+**Greenfield Scenario (Phase 1) - AFTER analyzing documents:**
+```
+> Which module do you need PRD for and what phase are you in?
+< User authentication and I'm in phase 1
+> Let me analyze the documents to understand user authentication requirements...
+> [After reading docs] Based on your business requirements, users need secure access to the reporting dashboard and admin panel. For phase 1, I recommend focusing on:
+1. Basic login for dashboard users only (email/password)
+2. Login + admin access with role differentiation  
+3. Login + admin access + password reset via email
+4. Login + admin access + password reset + basic profile management
+Which product scope would you like for this phase?
+```
 
 ## Process
-1. **Extract Module Info** - Find module details from implementation roadmap
-2. **Filter Requirements** - Extract relevant functional requirements for this module
-3. **Define Module Scope** - Clearly bound what this module does and doesn't do
-4. **Create User Stories** - Define user-facing functionality
-5. **Specify Business Logic** - Detail the product rules and behavior
-6. **Generate Document** - Use the structure below
-7. **Create Folder Structure** - Save to appropriate module folder
+
+1. **Extract Module Info** - Read and thoroughly analyze all provided documents to understand module requirements
+2. **Document-Based Phase Scoping** - Determine current phase scope through user interaction based on actual documented requirements
+3. **Filter Requirements** - Extract relevant functional requirements for this module and agreed phase scope from documents
+4. **Define Module Scope** - Clearly bound what this module does and doesn't do in this phase based on documentation
+5. **Create User Stories** - Define user-facing functionality appropriate for agreed phase scope using documented user needs
+6. **Specify Business Logic** - Detail the product rules and behavior needed for this phase only, based on documented requirements
+7. **Generate Document** - Use the structure below with phase-specific content
+8. **Create Folder Structure** - Save to appropriate module folder
+
+## Dynamic PRD Scoping Principles
+
+**The AI MUST analyze documents first, then intelligently suggest product scope based on:**
+
+- **Documented user needs** - What the business-requirements.md says about user problems and solutions
+- **Business objectives** - What vision.md says about this module's business value
+- **User journey complexity** - Start with documented happy paths, add documented edge cases later
+- **Feature dependencies** - What documented features must exist before others can work
+- **User value priority** - Most valuable documented features first
+- **Implementation complexity** - Simple documented features before complex ones
+
+**Critical Rule: NEVER suggest product features without first reading and understanding the module's documented user requirements**
+
+**Product scope suggestion principles:**
+
+- Phase 1: Core documented user journeys, documented happy path only
+- Phase 2+: Add documented error handling, edge cases, advanced features progressively
+- Each phase should deliver documented user value
+- Avoid feature creep - stick to documented requirements within a single phase
 
 ## Module Product Specification Structure
 
 ```markdown
-# [MODULE-NAME] Product Specification
+# PRD - Phase {N}
 
 ## 1. Module Overview
+
 - **Purpose:** What this module does in one sentence
 - **Business Value:** Why this module matters to the business
 - **User Value:** What users gain from this module
 - **Module Type:** [Core/Feature/Integration/Infrastructure]
+- **Phase {N} Scope:** What specific functionality is included in this phase
 
 ## 2. Scope & Boundaries
+
 - **In Scope:**
     - Specific capabilities this module provides
 - **Out of Scope:**
@@ -181,7 +247,7 @@ Unresolved issues that need clarification:
 
 ## Output
 * **Format:** Markdown (`.md`)
-* **Filename:** `docs/implementation/modules/[MODULE-NAME]/product-spec.md`
+* **Filename:** `docs/implementation/[MODULE-NAME]/phase-{N}-product-spec.md`
 * **Folder Structure:** Create module folder if it doesn't exist
 
 ## Cleanup Tasks
@@ -198,5 +264,6 @@ After generating the product specification:
 6. **Flag dependencies** - Clearly identify what this module needs from others
 7. **Consider the full user journey** - Include error cases and edge scenarios
 8. **Use 4 spaces for indentation** - Follow project formatting standards
-9. **DO NOT** ask questions already answered in supporting documents
-10. **DO NOT** draft until all clarifying questions are addressed
+9. **STRICT TITLE FORMAT** - Document title must be exactly "PRD - Phase {N}" (no module name, no additional text)
+10. **DO NOT** ask questions already answered in supporting documents
+11. **DO NOT** draft until all clarifying questions are addressed
