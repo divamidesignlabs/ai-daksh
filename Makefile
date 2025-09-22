@@ -27,7 +27,7 @@ BROWSER := python -c "$$BROWSER_PYSCRIPT"
 help:
 	@python -c "$$PRINT_HELP_PYSCRIPT" < $(MAKEFILE_LIST)
 
-clean: clean-build clean-pyc clean-test ## remove all build, test, coverage and Python artifacts
+clean: clean-build clean-pyc clean-test clean-assets clean-npm ## remove all build, test, coverage, Python and npm artifacts
 
 clean-build: ## remove build artifacts
 	rm -fr build/
@@ -48,6 +48,9 @@ clean-test: ## remove test and coverage artifacts
 	rm -fr htmlcov/
 	rm -fr .pytest_cache
 
+clean-assets: ## remove copied assets from src/daksh/
+	rm -rf src/daksh/assets
+
 lint/flake8: ## check style with flake8
 	flake8 daksh tests
 
@@ -66,12 +69,47 @@ coverage: ## check code coverage quickly with the default Python
 	coverage html
 	$(BROWSER) htmlcov/index.html
 
-release: dist ## package and upload a release
+publish-python: dist ## package and upload a release
 	twine upload --repository divami dist/*
 
+publish-npm: npm-pack ## package and upload npm release
+	npm publish
+
+publish: sync-version dist npm-pack ## package and upload to both Python and npm registries
+	@echo "🚀 Publishing to Python registry..."
+	twine upload --repository divami dist/*
+	@echo "🚀 Publishing to npm registry..."
+	npm publish
+	@echo "✅ Published to both registries successfully!"
+
 dist: clean ## builds source and wheel package
+	python scripts/build_prep.py
 	python -m build
 	ls -l dist
+
+npm-pack: clean-npm ## builds npm package
+	@echo "📦 Building npm package..."
+	npm pack
+	@echo "✅ npm package built successfully"
+	ls -l *.tgz
+
+npm-test: npm-pack ## test the npm package locally
+	@echo "🧪 Testing npm package locally..."
+	npm install -g ./daksh-ai-*.tgz
+	@echo "Testing CLI command..."
+	daksh --help
+	@echo "✅ npm package test completed"
+
+sync-version: ## sync npm version with Python version
+	@echo "🔄 Syncing package versions..."
+	@PYTHON_VERSION=$$(grep '^version = ' pyproject.toml | sed 's/version = "\(.*\)"/\1/'); \
+	echo "Python version: $$PYTHON_VERSION"; \
+	npm version $$PYTHON_VERSION --no-git-tag-version; \
+	echo "✅ Versions synchronized"
+
+clean-npm: ## remove npm artifacts
+	rm -f *.tgz
+	rm -rf node_modules
 
 install: clean ## install the package to the active Python's site-packages
 	python setup.py install
@@ -83,4 +121,8 @@ serve-docs: docs ## serve the documentation with mkdocs
 	mkdocs serve
 
 export:
-	nbdev_export
+	nbdev_exportpreview:
+	mkdocs serve
+
+build-docs:
+	mkdocs build

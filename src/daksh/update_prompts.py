@@ -59,8 +59,23 @@ def update_prompts(dry_run: bool = False):
             elif f.is_dir():
                 shutil.copytree(f, to, dirs_exist_ok=True)
 
+    # Try local assets first (for packaged version), then fall back to root assets (for development)
     cwd = current_file_dir(__file__)
-    copy(cwd / "assets/daksh-prompts", P(".daksh"))
+    local_assets = cwd / "assets"
+    root_assets = cwd.parent.parent.parent / "assets"
+
+    if local_assets.exists():
+        assets_dir = local_assets
+        Info("Using packaged assets")
+    elif root_assets.exists():
+        assets_dir = root_assets
+        Info("Using development assets from project root")
+    else:
+        raise FileNotFoundError(
+            "Assets directory not found in either local or root location"
+        )
+
+    copy(assets_dir / "daksh-prompts", P(".daksh"))
 
     if P(".vscode/settings.json").exists():
         settings = read_json(P(".vscode/settings.json"))
@@ -87,12 +102,11 @@ def update_prompts(dry_run: bool = False):
     if not os.path.exists(".github"):
         os.makedirs(".github")
     shutil.copy(
-        cwd / "assets/copilot-instructions.md", ".github/copilot-instructions.md"
+        assets_dir / "copilot-instructions.md", ".github/copilot-instructions.md"
     )
-    shutil.copy(cwd / "assets/mkdocs.yml", "mkdocs.yml")
-    append_lines(P("makefile"), read_lines(cwd / "assets/makefile"))
+    shutil.copy(assets_dir / "mkdocs.yml", "mkdocs.yml")
     os.makedirs("docs/overrides", exist_ok=True)
-    shutil.copy(cwd / "assets/extra.css", "docs/overrides/extra.css")
-    shutil.copytree(cwd / "assets/overrides", "./overrides", dirs_exist_ok=True)
+    shutil.copy(assets_dir / "extra.css", "docs/overrides/extra.css")
+    shutil.copytree(assets_dir / "overrides", "./overrides", dirs_exist_ok=True)
     if not os.path.exists("docs/index.md"):
-        shutil.copy(cwd / "assets/index.md", "docs/index.md")
+        shutil.copy(assets_dir / "index.md", "docs/index.md")
