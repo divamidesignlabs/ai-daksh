@@ -423,7 +423,7 @@ After generating the roadmap:
 1. **Think organically** - Every iteration produces a living, working system
 2. **Maintain vertical integrity** - Never complete one layer without the others
 3. **Build for feedback** - Include validation mechanisms in every iteration
-4. **Use component names with Camel-Case** - User-Auth, Data-Layer, API-Gateway
+4. **Use component names with Title-Kebab-Case** - User-Auth, Data-Layer, API-Gateway
 5. **Show parallel opportunities** - Clearly indicate what can be built simultaneously
 6. **Address risks early** - Sequence high-risk items for early validation
 7. **Keep it adaptive** - Build in pivot points and adjustment mechanisms
