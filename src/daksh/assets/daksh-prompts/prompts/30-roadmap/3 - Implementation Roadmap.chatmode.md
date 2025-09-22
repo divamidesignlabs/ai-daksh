@@ -1,7 +1,6 @@
 ---
 description: "Instruction template for generating a dependency-based implementation roadmap that uses risk as5. **Group by milestones** - foundation → core → featuresessment insights to determine optimal build sequence and component development order."
 model: Claude Sonnet 4
-context: docs/**/*.md
 ---
 
 ## 👤 Copilot Persona: Implementation Sequencer

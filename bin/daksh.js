@@ -33,7 +33,7 @@ function copyFileOrDir(src, dest) {
 function updatePrompts(dryRun = false) {
     // Track files that are created/copied
     const addedFiles = [];
-    
+
     // Get the project root (where package.json is located)
     const projectRoot = path.dirname(__dirname);
     const assetsDir = path.join(projectRoot, 'assets');
@@ -48,6 +48,12 @@ function updatePrompts(dryRun = false) {
     const promptsDest = '.daksh';
 
     if (!dryRun) {
+        // Remove existing .daksh folder before copying
+        if (fs.existsSync(promptsDest)) {
+            info('Removing existing .daksh folder');
+            fs.rmSync(promptsDest, { recursive: true, force: true });
+        }
+
         // Copy each subdirectory individually to track them
         if (fs.existsSync(promptsSource)) {
             if (!fs.existsSync(promptsDest)) {
@@ -62,7 +68,7 @@ function updatePrompts(dryRun = false) {
             }
         }
     } else {
-        info(`Would copy ${promptsSource} to ${promptsDest}`);
+        info(`Would remove existing ${promptsDest} and copy ${promptsSource} to ${promptsDest}`);
     }
 
     // Update .vscode/settings.json
@@ -80,7 +86,7 @@ function updatePrompts(dryRun = false) {
     if (!settings['chat.modeFilesLocations']) {
         settings['chat.modeFilesLocations'] = {};
     }
-    settings['chat.modeFilesLocations']['.daksh/prompts'] = true;
+    settings['chat.modeFilesLocations']['.daksh/prompts/**/'] = true;
 
     if (!dryRun) {
         if (!fs.existsSync('.vscode')) {
@@ -101,7 +107,7 @@ function updatePrompts(dryRun = false) {
             output: process.stdout
         });
 
-        rl.question('Found an existing .github/copilot-instructions.md should we back it up? [y/n]: ', (answer) => {
+        rl.question('Found an existing .github/copilot-instructions.md should we back it up? [y/N]: ', (answer) => {
             if (answer.toLowerCase() === 'y') {
                 const timestamp = new Date().toISOString().replace(/[:.]/g, '').replace('T', '').slice(0, 14);
                 const backup = `.github/copilot-instructions.md.bak.${timestamp}`;
@@ -129,7 +135,7 @@ function updatePrompts(dryRun = false) {
             // Copy files from assets
             fs.copyFileSync(path.join(assetsDir, 'copilot-instructions.md'), copilotInstructions);
             addedFiles.push(copilotInstructions);
-            
+
             fs.copyFileSync(path.join(assetsDir, 'mkdocs.yml'), 'mkdocs.yml');
             addedFiles.push('mkdocs.yml');
 
@@ -139,7 +145,7 @@ function updatePrompts(dryRun = false) {
             }
             fs.copyFileSync(path.join(assetsDir, 'extra.css'), 'docs/overrides/extra.css');
             addedFiles.push('docs/overrides/extra.css');
-            
+
             copyFileOrDir(path.join(assetsDir, 'overrides'), './overrides');
             addedFiles.push('./overrides');
 
@@ -148,7 +154,7 @@ function updatePrompts(dryRun = false) {
                 fs.copyFileSync(path.join(assetsDir, 'index.md'), 'docs/index.md');
                 addedFiles.push('docs/index.md');
             }
-            
+
             // Display summary of added files
             console.log('\n📁 Files added to current working directory:');
             addedFiles.forEach(file => {

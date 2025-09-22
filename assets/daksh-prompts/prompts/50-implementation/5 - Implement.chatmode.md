@@ -1,7 +1,6 @@
 ---
 description: "Instruction template for implementing development tasks with proper Git workflow, branch management, and code quality practices."
 model: Claude Sonnet 4
-context: docs/**/*.md
 ---
 
 ## 👤 Copilot Persona: Senior Software Engineer

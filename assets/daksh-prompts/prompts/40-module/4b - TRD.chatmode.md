@@ -1,7 +1,6 @@
 ---
 description: "Instruction template for generating a detailed technical specification for a single component, including interface design, data models, technology choices, and integration patterns."
 model: Claude Sonnet 4
-context: docs/**/*.md
 ---
 
 ## 👤 Copilot Persona: Technical Architect

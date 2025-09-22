@@ -66,20 +66,27 @@ def update_prompts(dry_run: bool = False):
     # Try local assets first (for packaged version), then fall back to root assets (for development)
     cwd = current_file_dir(__file__)
     local_assets = cwd / "assets"
-    root_assets = cwd.parent.parent.parent / "assets"
+    root_assets = cwd.parent.parent / "assets"
 
-    if local_assets.exists():
-        assets_dir = local_assets
-        Info("Using packaged assets")
-    elif root_assets.exists():
+    if root_assets.exists():
         assets_dir = root_assets
         Info("Using development assets from project root")
+    elif local_assets.exists():
+        assets_dir = local_assets
+        Info("Using packaged assets")
     else:
         raise FileNotFoundError(
             "Assets directory not found in either local or root location"
         )
 
-    copy(assets_dir / "daksh-prompts", P(".daksh"))
+    # Remove existing .daksh folder before copying
+    daksh_dest = P(".daksh")
+    if daksh_dest.exists():
+        Info("Removing existing .daksh folder")
+        if not dry_run:
+            shutil.rmtree(daksh_dest)
+
+    copy(assets_dir / "daksh-prompts", daksh_dest)
 
     if P(".vscode/settings.json").exists():
         settings = read_json(P(".vscode/settings.json"))
@@ -87,7 +94,7 @@ def update_prompts(dry_run: bool = False):
         settings = {}
 
     chat_mode_files_locations = settings.get("chat.modeFilesLocations", {})
-    chat_mode_files_locations[".daksh/prompts"] = True
+    chat_mode_files_locations[".daksh/prompts/**/"] = True
     settings["chat.modeFilesLocations"] = chat_mode_files_locations
     write_json(P(".vscode/settings.json"), settings)
     added_files.append(".vscode/settings.json")
@@ -95,7 +102,7 @@ def update_prompts(dry_run: bool = False):
     if os.path.exists(".github/copilot-instructions.md"):
         if (
             input(
-                "Found an existing .github/copilot-instructions.md should we back it up? [y/n]: "
+                "Found an existing .github/copilot-instructions.md should we back it up? [y/N]: "
             ).lower()
             != "y"
         ):
@@ -111,21 +118,21 @@ def update_prompts(dry_run: bool = False):
         assets_dir / "copilot-instructions.md", ".github/copilot-instructions.md"
     )
     added_files.append(".github/copilot-instructions.md")
-    
+
     shutil.copy(assets_dir / "mkdocs.yml", "mkdocs.yml")
     added_files.append("mkdocs.yml")
-    
+
     os.makedirs("docs/overrides", exist_ok=True)
     shutil.copy(assets_dir / "extra.css", "docs/overrides/extra.css")
     added_files.append("docs/overrides/extra.css")
-    
+
     shutil.copytree(assets_dir / "overrides", "./overrides", dirs_exist_ok=True)
     added_files.append("./overrides")
-    
+
     if not os.path.exists("docs/index.md"):
         shutil.copy(assets_dir / "index.md", "docs/index.md")
         added_files.append("docs/index.md")
-    
+
     # Display summary of added files
     print("\n📁 Files added to current working directory:")
     for file in added_files:

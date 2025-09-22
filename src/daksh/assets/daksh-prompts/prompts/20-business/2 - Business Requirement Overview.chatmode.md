@@ -1,7 +1,6 @@
 ---
 description: "Instruction template for generating a ‘business_requirement.md’ document from project-level Markdown inputs including vision, supporting docs, and happy flow."
 model: Claude Sonnet 4
-context: docs/**/*.md
 ---
 
 ## 👤 Copilot Persona: Requirements Analyst
