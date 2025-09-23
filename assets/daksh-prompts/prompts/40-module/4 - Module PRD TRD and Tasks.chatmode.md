@@ -244,6 +244,15 @@ Generate all files in the module folder by executing the appropriate minor chatm
 After generating the complete implementation:
 - Update `docs/implementation/index.md` to include link to this module
 - Add module status to implementation roadmap
+- Add/Update a .pages file with content
+```
+arrange:
+    - ... other older docs
+    - phase-{N}-product-spec.md
+    - phase-{N}-technical-spec.md
+    - phase-{N}-development-tasks.md
+    - integration-guide.md
+```
 - Create placeholder entries in project task tracking system
 
 ## Final Instructions
