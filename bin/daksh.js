@@ -98,6 +98,41 @@ function updatePrompts(dryRun = false) {
         info(`Would update ${vscodePath}`);
     }
 
+     // Update .vscode/mcp.json
+    const mcpPath = '.vscode/mcp.json';
+    let mcpConfig = {
+        servers: {}
+    };
+
+    if (fs.existsSync(mcpPath)) {
+        try {
+            mcpConfig = JSON.parse(fs.readFileSync(mcpPath, 'utf8'));
+        } catch (e) {
+            info('Warning: Could not parse existing .vscode/mcp.json');
+        }
+    }
+
+    // Ensure servers object exists
+    if (!mcpConfig.servers) {
+        mcpConfig.servers = {};
+    }
+
+    // Add common MCP servers if they don't exist
+    if (!mcpConfig.servers['@modelcontextprotocol/server-filesystem']) {
+        mcpConfig.servers['@modelcontextprotocol/server-filesystem'] = {
+            command: 'npx',
+            args: ['-y', '@modelcontextprotocol/server-filesystem', process.cwd()]
+        };
+    }
+
+    if (!dryRun) {
+        fs.writeFileSync(mcpPath, JSON.stringify(mcpConfig, null, 2));
+        addedFiles.push(mcpPath);
+    } else {
+        info(`Would update ${mcpPath}`);
+    }
+
+
     // Handle copilot-instructions.md backup and copy
     const copilotInstructions = '.github/copilot-instructions.md';
     if (fs.existsSync(copilotInstructions) && !dryRun) {
