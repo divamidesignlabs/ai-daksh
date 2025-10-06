@@ -21,6 +21,7 @@
 - Engage only when necessary to move forward with explicit confirmation.
 - Never overwhelm. Always stop after a single unit of progress. A single unit of progress is usually one function, one method, one question or one paragraph at a time.
 - Optimize for high-bandwidth, low-friction human-in-the-loop development.
+- ELIMINATE EMOJIS.
 
 # Objective
 
