@@ -19,29 +19,91 @@ Guide an AI assistant to produce a comprehensive module implementation package t
 
 ## Inputs
 1. **Module Name** — The specific module to implement (e.g., USER-AUTH, PAYMENT-PROCESSING)
-2. **docs/business-requirements.md** — Project-wide business and functional requirements
-3. **docs/implementation-roadmap.md** — Module dependencies and build sequence
-4. **docs/vision.md** — Project vision for strategic alignment
-5. **Supporting docs** — Additional context as needed
+2. **Current Phase** — The implementation phase you're targeting (to be determined interactively)
+3. **docs/business-requirements.md** — Project-wide business and functional requirements
+4. **docs/implementation-roadmap.md** — Module dependencies and build sequence
+5. **docs/vision.md** — Project vision for strategic alignment
+6. **Supporting docs** — Additional context as needed
 
 ## Clarifying Questions (Ask These Before Implementation)
-Before creating the complete implementation, ask these questions one at a time. Remember to ask ONLY if these are not answered in existing documents:
+Before creating the complete implementation, you MUST ask these questions in this specific order:
 
-- **Module Scope:** What specific functionality should this module provide?
-- **Technology Stack:** What frameworks, languages, and platforms should be used?
-- **Performance Requirements:** What are the expected load, speed, and scalability needs?
-- **Security Requirements:** What security measures must be implemented?
-- **Integration Requirements:** How should this module communicate with dependencies?
-- **Team Capacity:** How many developers will work on this module?
-- **Timeline Constraints:** Are there specific deadlines or milestones?
+1. **Module and Phase Identification:**
+   - "Which module do you need implementation for and what phase are you in?"
+   
+2. **Document Analysis and Context Extraction:**
+   - Read and analyze the provided documents (business-requirements.md, implementation-roadmap.md, vision.md)
+   - Extract specific information about the requested module:
+     - What functionality is described for this module?
+     - What are the business requirements related to this module?
+     - What dependencies does this module have?
+     - What role does it play in the overall system?
+   - Understand the module's purpose and scope from the documentation
+
+3. **Interactive Phase Scope Definition (Based on Document Analysis):**
+   - Based on the extracted module information and phase, suggest logical implementation scope
+   - If **Phase 1 (greenfield)**: Suggest progressive scope options starting from core functionality found in docs
+   - If **Phase 2+ (brownfield)**: Acknowledge what was likely implemented in previous phases and suggest next logical additions based on remaining requirements
+   - Present 3-4 numbered options derived from the actual documented requirements
+   - Wait for user selection
+
+4. **Additional Context (Ask only if not clear from documents):**
+   - Technology Stack, Performance Requirements, Security Requirements, etc.
+
+### Phase Scope Interaction Examples
+
+**Greenfield Scenario (Phase 1) - AFTER analyzing documents:**
+```
+> Which module do you need implementation for and what phase are you in?
+< CSV-parser and I'm in phase 1
+> Let me analyze the documents to understand CSV-parser requirements...
+> [After reading docs] Based on your business requirements, CSV-parser needs to handle data import for reports and user uploads. For phase 1, I recommend implementing:
+1. Basic CSV parsing for report data only (columns: name, date, amount)
+2. Basic parsing + user upload validation (file size, format checks)
+3. Basic parsing + validation + error reporting to users
+4. Basic parsing + validation + error reporting + basic data transformation
+Which scope would you like for this phase?
+```
+
+**Brownfield Scenario (Phase 2+):**
+```
+> Which module do you need implementation for and what phase are you in?  
+< CSV-parser and I'm in phase 2
+> You've already implemented phase 1 with basic CSV parsing. For phase 2, I recommend:
+1. Add edge case handling
+2. Edge cases + logging
+3. Edge cases + logging + performance optimization
+4. Edge cases + logging + optimization + monitoring
+Which scope would you like for phase 2?
+```
 
 ## Process
-1. **Extract Module Context** - Understand module role from roadmap and requirements
-2. **Execute PRD Generation** - Run the `PRD.minorchatmode.md` workflow to create product specification
-3. **Execute TRD Generation** - Run the `TRD.minorchatmode.md` workflow to create technical specification  
-4. **Execute Tasks Generation** - Run the `Dev Tasks.minorchatmode.md` workflow to create development breakdown
-5. **Generate Integration Documentation** - Create integration guide and README
-6. **Create Folder Structure** - Organize all artifacts properly
+1. **Extract Module Context** - Read and thoroughly analyze all provided documents to understand module requirements
+2. **Document-Based Phase Scoping** - Determine current phase scope through user interaction based on actual documented requirements
+3. **Execute PRD Generation** - Run the `PRD.chatmode.md` workflow to create phase-specific product specification
+4. **Execute TRD Generation** - Run the `TRD.chatmode.md` workflow to create phase-appropriate technical specification  
+5. **Execute Tasks Generation** - Run the `Dev Tasks.chatmode.md` workflow to create phase-scoped development breakdown
+6. **Generate Integration Documentation** - Create integration guide appropriate for current phase
+7. **Create Folder Structure** - Organize all artifacts properly
+
+## Dynamic Phase Scoping Guidelines
+
+**The AI MUST analyze documents first, then intelligently suggest phase scope based on:**
+- **Documented module requirements** - What the business-requirements.md says about this module
+- **Implementation roadmap context** - Module dependencies and sequence from roadmap
+- **Business objectives** - What vision.md says about this module's role
+- **Current phase number** - What's realistic to build incrementally  
+- **Previous phase assumptions** - What was likely implemented before (for Phase 2+)
+- **Logical progression** - Natural evolution of documented features
+
+**Critical Rule: NEVER suggest scope without first reading and understanding the module's documented requirements**
+
+**Scope suggestion principles:**
+- Phase 1: Start with core documented functionality only
+- Phase 2+: Build incrementally on previous phases using remaining documented requirements
+- Each phase should be deliverable and testable
+- Avoid overwhelming scope in any single phase
+- Base all suggestions on actual documented needs, not generic assumptions
 
 ## Execution Workflow
 
@@ -51,50 +113,50 @@ Before creating the complete implementation, ask these questions one at a time. 
 3. Create module folder structure
 
 ### Phase 2: Execute Minor Chatmodes
-**For each minor chatmode, use the SAME inputs and module name:**
+**For each minor chatmode, use the SAME inputs including module name AND current phase:**
 
 1. **PRD Generation:**
-   - Execute `PRD.minorchatmode.md` workflow
-   - Input: Module name + all supporting documents
-   - Output: `product-spec.md`
+   - Execute `PRD.chatmode.md` workflow
+   - Input: Module name + Current Phase + all supporting documents
+   - Output: `phase-{N}-product-spec.md` (scoped to current phase)
 
 2. **TRD Generation:**
-   - Execute `TRD.minorchatmode.md` workflow  
-   - Input: Module name + all supporting documents + `product-spec.md`
-   - Output: `technical-spec.md`
+   - Execute `TRD.chatmode.md` workflow  
+   - Input: Module name + Current Phase + all supporting documents + `phase-{N}-product-spec.md`
+   - Output: `phase-{N}-technical-spec.md` (architecture appropriate for current phase)
 
 3. **Tasks Generation:**
-   - Execute `Dev Tasks.minorchatmode.md` workflow
-   - Input: Module name + all supporting documents + `product-spec.md` + `technical-spec.md`
-   - Output: `development-tasks.md`
+   - Execute `Dev Tasks.chatmode.md` workflow
+   - Input: Module name + Current Phase + all supporting documents + `phase-{N}-product-spec.md` + `phase-{N}-technical-spec.md`
+   - Output: `phase-{N}-development-tasks.md` (tasks scoped to current phase only)
 
 ### Phase 3: Generate Supporting Documentation
 4. **Integration Guide:** Generate using template below
-5. **README:** Generate using template below
+5. **Index:** Generate using template below
 
 ## Complete Module Implementation Structure
 
 ### File Organization
 ```
-docs/implementation/modules/[MODULE-NAME]/
-├── README.md (Overview and navigation)
-├── product-spec.md (Product requirements and user stories)
-├── technical-spec.md (Architecture and technical design)
-├── development-tasks.md (Implementation breakdown)
+docs/implementation/[MODULE-NAME]/
+├── index.md (Overview with hyperlinks to all phase documents)
+├── phase-{N}-product-spec.md (Product requirements and user stories for this phase)
+├── phase-{N}-technical-spec.md (Architecture and technical design for this phase)
+├── phase-{N}-development-tasks.md (Implementation breakdown for this phase)
 └── integration-guide.md (How this module connects to others)
 ```
 
-### README.md Template
+### index.md Template
 ```markdown
-# [MODULE-NAME] Implementation Package
+# [MODULE-NAME] Progress Overview
 
 ## Overview
 Brief description of what this module does and its role in the system.
 
-## Implementation Documents
-- **[Product Specification](product-spec.md)** - User stories, business rules, acceptance criteria
-- **[Technical Specification](technical-spec.md)** - Architecture, APIs, data models
-- **[Development Tasks](development-tasks.md)** - Implementation breakdown and task list
+## Phase {N} Implementation Documents
+- **[PRD](phase-{N}-product-spec.md)** - User stories, business rules, acceptance criteria for Phase {N}
+- **[TRD](phase-{N}-technical-spec.md)** - Architecture, APIs, data models for Phase {N}
+- **[Tasks](phase-{N}-development-tasks.md)** - Implementation breakdown and task list for Phase {N}
 - **[Integration Guide](integration-guide.md)** - Dependencies and integration points
 
 ## Quick Start
@@ -113,13 +175,13 @@ Brief description of what this module does and its role in the system.
 ```
 
 ### Product Specification (product-spec.md)
-**Execute:** Use the `PRD.minorchatmode.md` workflow with the same module name and inputs to generate the complete product specification document.
+**Execute:** Use the `PRD.chatmode.md` workflow with the same module name and inputs to generate the complete product specification document.
 
 ### Technical Specification (technical-spec.md)  
-**Execute:** Use the `TRD.minorchatmode.md` workflow with the same module name and inputs to generate the complete technical specification document.
+**Execute:** Use the `TRD.chatmode.md` workflow with the same module name and inputs to generate the complete technical specification document.
 
 ### Development Tasks (development-tasks.md)
-**Execute:** Use the `Dev Tasks.minorchatmode.md` workflow with the same module name and inputs to generate the complete development task breakdown.
+**Execute:** Use the `Dev Tasks.chatmode.md` workflow with the same module name and inputs to generate the complete development task breakdown.
 
 ### Integration Guide (integration-guide.md)
 ```markdown
@@ -170,9 +232,9 @@ flowchart LR
 Generate all files in the module folder by executing the appropriate minor chatmodes:
 
 **Step 1: Execute Minor Chatmodes**
-* **product-spec.md** - Generated by running `PRD.minorchatmode.md`
-* **technical-spec.md** - Generated by running `TRD.minorchatmode.md`  
-* **development-tasks.md** - Generated by running `Dev Tasks.minorchatmode.md`
+* **product-spec.md** - Generated by running `PRD.chatmode.md`
+* **technical-spec.md** - Generated by running `TRD.chatmode.md`  
+* **development-tasks.md** - Generated by running `Dev Tasks.chatmode.md`
 
 **Step 2: Create Supporting Files**
 * **README.md** - Navigation and overview (generate using template above)
@@ -182,6 +244,15 @@ Generate all files in the module folder by executing the appropriate minor chatm
 After generating the complete implementation:
 - Update `docs/implementation/index.md` to include link to this module
 - Add module status to implementation roadmap
+- Add/Update a .pages file with content
+```
+arrange:
+    - ... other older docs
+    - phase-{N}-product-spec.md
+    - phase-{N}-technical-spec.md
+    - phase-{N}-development-tasks.md
+    - integration-guide.md
+```
 - Create placeholder entries in project task tracking system
 
 ## Final Instructions
