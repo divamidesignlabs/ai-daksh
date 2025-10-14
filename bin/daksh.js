@@ -73,63 +73,73 @@ function updatePrompts(dryRun = false) {
 
     // Update .vscode/settings.json
     const vscodePath = '.vscode/settings.json';
-    let settings = {};
-
-    if (fs.existsSync(vscodePath)) {
-        try {
-            settings = JSON.parse(fs.readFileSync(vscodePath, 'utf8'));
-        } catch (e) {
-            info('Warning: Could not parse existing .vscode/settings.json');
-        }
-    }
-
-    if (!settings['chat.modeFilesLocations']) {
-        settings['chat.modeFilesLocations'] = {};
-    }
-    settings['chat.modeFilesLocations']['.daksh/prompts/**/'] = true;
-
+    const settingsSource = path.join(assetsDir, 'json-files', 'settings.json');
+    
     if (!dryRun) {
         if (!fs.existsSync('.vscode')) {
             fs.mkdirSync('.vscode', { recursive: true });
         }
+        
+        let settings = {};
+        
+        // Read existing settings if they exist
+        if (fs.existsSync(vscodePath)) {
+            try {
+                settings = JSON.parse(fs.readFileSync(vscodePath, 'utf8'));
+            } catch (e) {
+                info('Warning: Could not parse existing .vscode/settings.json');
+            }
+        }
+        
+        // Read template settings from assets
+        if (fs.existsSync(settingsSource)) {
+            try {
+                const templateSettings = JSON.parse(fs.readFileSync(settingsSource, 'utf8'));
+                // Merge template settings with existing settings
+                settings = { ...settings, ...templateSettings };
+            } catch (e) {
+                info('Warning: Could not parse template settings.json');
+            }
+        }
+        
         fs.writeFileSync(vscodePath, JSON.stringify(settings, null, 2));
         addedFiles.push(vscodePath);
     } else {
-        info(`Would update ${vscodePath}`);
+        info(`Would update ${vscodePath} using template from ${settingsSource}`);
     }
 
      // Update .vscode/mcp.json
     const mcpPath = '.vscode/mcp.json';
-    let mcpConfig = {
-        servers: {}
-    };
-
-    if (fs.existsSync(mcpPath)) {
-        try {
-            mcpConfig = JSON.parse(fs.readFileSync(mcpPath, 'utf8'));
-        } catch (e) {
-            info('Warning: Could not parse existing .vscode/mcp.json');
-        }
-    }
-
-    // Ensure servers object exists
-    if (!mcpConfig.servers) {
-        mcpConfig.servers = {};
-    }
-
-    // Add common MCP servers if they don't exist
-    if (!mcpConfig.servers['@modelcontextprotocol/server-filesystem']) {
-        mcpConfig.servers['@modelcontextprotocol/server-filesystem'] = {
-            command: 'npx',
-            args: ['-y', '@modelcontextprotocol/server-filesystem', process.cwd()]
-        };
-    }
-
+    const mcpSource = path.join(assetsDir, 'json-files', 'mcp.json');
+    
     if (!dryRun) {
+        let mcpConfig = { servers: {} };
+        
+        // Read existing mcp.json if it exists
+        if (fs.existsSync(mcpPath)) {
+            try {
+                mcpConfig = JSON.parse(fs.readFileSync(mcpPath, 'utf8'));
+            } catch (e) {
+                info('Warning: Could not parse existing .vscode/mcp.json');
+            }
+        }
+        
+        // Read template mcp.json from assets
+        if (fs.existsSync(mcpSource)) {
+            try {
+                const templateMcp = JSON.parse(fs.readFileSync(mcpSource, 'utf8'));
+                // Merge template with existing config, preserving existing servers
+                if (!mcpConfig.servers) mcpConfig.servers = {};
+                mcpConfig.servers = { ...mcpConfig.servers, ...templateMcp.servers };
+            } catch (e) {
+                info('Warning: Could not parse template mcp.json');
+            }
+        }
+        
         fs.writeFileSync(mcpPath, JSON.stringify(mcpConfig, null, 2));
         addedFiles.push(mcpPath);
     } else {
-        info(`Would update ${mcpPath}`);
+        info(`Would update ${mcpPath} using template from ${mcpSource}`);
     }
 
 
@@ -174,6 +184,9 @@ function updatePrompts(dryRun = false) {
             fs.copyFileSync(path.join(assetsDir, 'mkdocs.yml'), 'mkdocs.yml');
             addedFiles.push('mkdocs.yml');
 
+            // fs.copyFileSync(path.join(assetsDir, 'mcp_deps.txt'), 'mcp_deps.txt');
+            // addedFiles.push('mcp_deps.txt');
+
             // Copy CSS and overrides
             if (!fs.existsSync('docs/overrides')) {
                 fs.mkdirSync('docs/overrides', { recursive: true });
@@ -184,11 +197,57 @@ function updatePrompts(dryRun = false) {
             copyFileOrDir(path.join(assetsDir, 'overrides'), './overrides');
             addedFiles.push('./overrides');
 
+            // Copy fastMcp folder
+            // copyFileOrDir(path.join(assetsDir, 'fastMcp'), './fastMcp');
+            // addedFiles.push('./fastMcp');
+
             // Copy index.md if it doesn't exist
             if (!fs.existsSync('docs/index.md')) {
                 fs.copyFileSync(path.join(assetsDir, 'index.md'), 'docs/index.md');
                 addedFiles.push('docs/index.md');
             }
+
+            // Copy mkdocs helper files if present in assets
+            ['mkdocs_deps.txt', 'run-mkdocs.sh'].forEach(f => {
+                const srcF = path.join(assetsDir, f);
+                if (fs.existsSync(srcF)) {
+                    fs.copyFileSync(srcF, f);
+                    if (f.endsWith('.sh')) {
+                        try { fs.chmodSync(f, 0o755); } catch (e) { info(`Could not chmod ${f}: ${e.message}`); }
+                    }
+                    addedFiles.push(f);
+                }
+            });
+
+            // Create or update .vscode/tasks.json
+            const tasksPath = '.vscode/tasks.json';
+            const tasksSource = path.join(assetsDir, 'json-files', 'tasks.json');
+            
+            let tasksData = { version: '2.0.0', tasks: [] };
+            
+            // Read existing tasks.json if it exists
+            if (fs.existsSync(tasksPath)) {
+                try {
+                    tasksData = JSON.parse(fs.readFileSync(tasksPath, 'utf8'));
+                } catch (e) {
+                    info('Warning: Could not parse existing tasks.json; using template');
+                }
+            }
+            
+            // Read template tasks.json from assets
+            if (fs.existsSync(tasksSource)) {
+                try {
+                    const templateTasks = JSON.parse(fs.readFileSync(tasksSource, 'utf8'));
+                    // Use template tasks, but preserve version and merge with existing if needed
+                    tasksData = { ...tasksData, ...templateTasks };
+                } catch (e) {
+                    info('Warning: Could not parse template tasks.json');
+                }
+            }
+            
+            if (!fs.existsSync('.vscode')) fs.mkdirSync('.vscode', { recursive: true });
+            fs.writeFileSync(tasksPath, JSON.stringify(tasksData, null, 2));
+            addedFiles.push(tasksPath);
 
             // Display summary of added files
             console.log('\n📁 Files added to current working directory:');

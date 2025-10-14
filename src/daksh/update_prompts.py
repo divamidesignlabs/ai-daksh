@@ -88,16 +88,55 @@ def update_prompts(dry_run: bool = False):
 
     copy(assets_dir / "daksh-prompts", daksh_dest)
 
-    if P(".vscode/settings.json").exists():
-        settings = read_json(P(".vscode/settings.json"))
+    # Update .vscode/settings.json using template
+    settings_path = P(".vscode/settings.json")
+    settings_template = assets_dir / "json-files" / "settings.json"
+    
+    if settings_path.exists():
+        settings = read_json(settings_path)
     else:
         settings = {}
+    
+    # Read template settings and merge
+    if settings_template.exists():
+        try:
+            template_settings = read_json(settings_template)
+            settings.update(template_settings)
+        except Exception as e:
+            Info(f"Warning: Could not parse template settings.json: {e}")
+    else:
+        # Fallback to manual construction if template doesn't exist
+        chat_mode_files_locations = settings.get("chat.modeFilesLocations", {})
+        chat_mode_files_locations[".daksh/prompts/**/"] = True
+        settings["chat.modeFilesLocations"] = chat_mode_files_locations
+    
+    if not dry_run:
+        write_json(settings_path, settings)
+    added_files.append(str(settings_path))
 
-    chat_mode_files_locations = settings.get("chat.modeFilesLocations", {})
-    chat_mode_files_locations[".daksh/prompts/**/"] = True
-    settings["chat.modeFilesLocations"] = chat_mode_files_locations
-    write_json(P(".vscode/settings.json"), settings)
-    added_files.append(".vscode/settings.json")
+    # Update .vscode/mcp.json using template
+    mcp_path = P(".vscode/mcp.json")
+    mcp_template = assets_dir / "json-files" / "mcp.json"
+    
+    if mcp_path.exists():
+        mcp_config = read_json(mcp_path)
+    else:
+        mcp_config = {"servers": {}}
+    
+    # Read template mcp.json and merge servers
+    if mcp_template.exists():
+        try:
+            template_mcp = read_json(mcp_template)
+            if "servers" not in mcp_config:
+                mcp_config["servers"] = {}
+            # Merge servers from template
+            mcp_config["servers"].update(template_mcp.get("servers", {}))
+        except Exception as e:
+            Info(f"Warning: Could not parse template mcp.json: {e}")
+    
+    if not dry_run:
+        write_json(mcp_path, mcp_config)
+    added_files.append(str(mcp_path))
 
     if os.path.exists(".github/copilot-instructions.md"):
         if (
@@ -122,6 +161,16 @@ def update_prompts(dry_run: bool = False):
     shutil.copy(assets_dir / "mkdocs.yml", "mkdocs.yml")
     added_files.append("mkdocs.yml")
 
+    shutil.copy(assets_dir / "mkdocs_deps.txt", "mkdocs_deps.txt")
+    added_files.append("mkdocs_deps.txt")
+
+    shutil.copy(assets_dir / "run-mkdocs.sh", "run-mkdocs.sh")
+    added_files.append("run-mkdocs.sh")
+
+    # shutil.copy(assets_dir / "mcp_deps.txt", "mcp_deps.txt")
+    # added_files.append("mcp_deps.txt")
+
+
     os.makedirs("docs/overrides", exist_ok=True)
     shutil.copy(assets_dir / "extra.css", "docs/overrides/extra.css")
     added_files.append("docs/overrides/extra.css")
@@ -129,9 +178,79 @@ def update_prompts(dry_run: bool = False):
     shutil.copytree(assets_dir / "overrides", "./overrides", dirs_exist_ok=True)
     added_files.append("./overrides")
 
+    # # Copy fastMcp folder
+    # if not dry_run:
+    #     shutil.copytree(assets_dir / "fastMcp", "./fastMcp", dirs_exist_ok=True)
+    # added_files.append("./fastMcp")
+
     if not os.path.exists("docs/index.md"):
         shutil.copy(assets_dir / "index.md", "docs/index.md")
         added_files.append("docs/index.md")
+
+    # Ensure mkdocs helper files (if present in assets) are copied
+    for helper in ["mkdocs_deps.txt", "run-mkdocs.sh"]:
+        src_helper = assets_dir / helper
+        if src_helper.exists():
+            Info(f"Adding helper asset {src_helper} -> {helper}")
+            if not dry_run:
+                shutil.copy(src_helper, helper)
+                if helper.endswith('.sh'):
+                    os.chmod(helper, 0o755)
+            added_files.append(helper)
+
+    # Create or update .vscode/tasks.json using template
+    tasks_json_path = P('.vscode/tasks.json')
+    tasks_template = assets_dir / "json-files" / "tasks.json"
+    
+    if tasks_json_path.exists():
+        try:
+            existing_tasks = read_json(tasks_json_path)
+        except Exception:
+            existing_tasks = {"version": "2.0.0", "tasks": []}
+    else:
+        existing_tasks = {"version": "2.0.0", "tasks": []}
+    
+    # Read template tasks.json and use it as base
+    if tasks_template.exists():
+        try:
+            template_tasks = read_json(tasks_template)
+            # Use template as base, but preserve any existing custom tasks if needed
+            final_tasks = template_tasks
+        except Exception as e:
+            Info(f"Warning: Could not parse template tasks.json: {e}")
+            # Fallback to manual construction
+            final_tasks = {
+                "version": "2.0.0",
+                "tasks": [
+                    {
+                        "label": "Run MkDocs",
+                        "type": "shell",
+                        "command": "chmod +x ./run-mkdocs.sh && ./run-mkdocs.sh",
+                        "problemMatcher": [],
+                        "group": {"kind": "build", "isDefault": True},
+                    }
+                ],
+            }
+    else:
+        # Fallback to manual construction if template doesn't exist
+        final_tasks = {
+            "version": "2.0.0",
+            "tasks": [
+                {
+                    "label": "Run MkDocs",
+                    "type": "shell",
+                    "command": "chmod +x ./run-mkdocs.sh && ./run-mkdocs.sh",
+                    "problemMatcher": [],
+                    "group": {"kind": "build", "isDefault": True},
+                }
+            ],
+        }
+    
+    if not dry_run:
+        if not tasks_json_path.parent.exists():
+            tasks_json_path.parent.mkdir(parents=True, exist_ok=True)
+        write_json(tasks_json_path, final_tasks)
+    added_files.append(str(tasks_json_path))
 
     # Display summary of added files
     print("\n📁 Files added to current working directory:")
