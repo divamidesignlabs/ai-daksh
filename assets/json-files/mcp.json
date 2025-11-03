@@ -1,8 +1,11 @@
 {
   "servers": {
-     "md-converter": {
-            "url": "http://0.0.0.0:8080/mcp/",
-            "type": "http"
-        }
+     "research-mcp-server": {
+       "url": "https://your_url.com/mcp",
+      "type": "http",
+       "headers": {
+        "Authorization": "Bearer <your-token-here>"
+      }
+    }
   }
 }

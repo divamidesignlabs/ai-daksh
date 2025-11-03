@@ -257,3 +257,65 @@ def update_prompts(dry_run: bool = False):
     for file in added_files:
         print(f"   ✓ {file}")
     print(f"\nTotal: {len(added_files)} files/directories added or updated\n")
+
+
+@cli.command()
+def research_prompts(dry_run: bool = False):
+    """Update only research templates into .daksh/templates and register glob."""
+    added_files: list[str] = []
+
+    def copy_templates(src_root: P, dst_root: P):
+        templates_src = src_root / "daksh-prompts" / "templates"
+        if not templates_src.exists():
+            raise FileNotFoundError(f"Templates folder not found at {templates_src}")
+        dst_templates = dst_root / "templates"
+        Info(f"Syncing templates from {templates_src} to {dst_templates}")
+        if dry_run:
+            return
+        shutil.copytree(templates_src, dst_templates, dirs_exist_ok=True)
+        added_files.append(str(dst_templates))
+
+    cwd = current_file_dir(__file__)
+    local_assets = cwd / "assets"
+    root_assets = cwd.parent.parent / "assets"
+    if root_assets.exists():
+        assets_dir = root_assets
+        Info("Using development assets from project root")
+    elif local_assets.exists():
+        assets_dir = local_assets
+        Info("Using packaged assets")
+    else:
+        raise FileNotFoundError("Assets directory not found in either local or root location")
+
+    daksh_dest = P(".daksh")
+    if not daksh_dest.exists():
+        Info("Creating .daksh directory")
+        if not dry_run:
+            daksh_dest.mkdir(parents=True, exist_ok=True)
+
+    copy_templates(assets_dir, daksh_dest)
+
+    # Update settings.json with templates glob
+    settings_path = P(".vscode/settings.json")
+    if settings_path.exists():
+        try:
+            settings = read_json(settings_path)
+        except Exception:
+            settings = {}
+            Info("Warning: Could not parse existing settings.json; recreating")
+    else:
+        settings = {}
+
+    chat_mode_files_locations = settings.get("chat.modeFilesLocations", {})
+    chat_mode_files_locations[".daksh/templates/**/"] = True
+    settings["chat.modeFilesLocations"] = chat_mode_files_locations
+    if dry_run:
+        Info("[dry-run] Would write templates glob to .vscode/settings.json")
+    else:
+        write_json(settings_path, settings)
+        added_files.append(str(settings_path))
+
+    print("\n📁 Research templates added/updated:")
+    for f in added_files:
+        print(f"   ✓ {f}")
+    print(f"\nTotal: {len(added_files)} templates-related files/directories added or updated{' (dry-run)' if dry_run else ''}\n")
