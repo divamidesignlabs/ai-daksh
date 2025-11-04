@@ -1,6 +1,5 @@
 {
   "chat.modeFilesLocations": {
-    ".daksh/prompts/**/": true,
-    ".daksh/templates/**/": true
+    ".daksh/prompts/**/": true
   }
 }

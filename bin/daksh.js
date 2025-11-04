@@ -72,40 +72,30 @@ function updatePrompts(dryRun = false) {
     }
 
     // Update .vscode/settings.json
-    const vscodePath = '.vscode/settings.json';
+   const vscodePath = '.vscode/settings.json';
     const settingsSource = path.join(assetsDir, 'json-files', 'settings.json');
-    
+    let settings = {};
+    if (fs.existsSync(vscodePath)) {
+        try { settings = JSON.parse(fs.readFileSync(vscodePath, 'utf8')); } catch { info('Warning: Could not parse existing .vscode/settings.json'); }
+    }
+    if (fs.existsSync(settingsSource)) {
+        try {
+            const templateSettings = JSON.parse(fs.readFileSync(settingsSource, 'utf8'));
+            settings = { ...settings, ...templateSettings };
+        } catch { info('Warning: Could not parse template settings.json'); }
+    }
+    // Adjust chat.modeFilesLocations: remove any prompts glob, add templates glob
+    if (!settings['chat.modeFilesLocations']) settings['chat.modeFilesLocations'] = {};
+    for (const key of Object.keys(settings['chat.modeFilesLocations'])) {
+        if (key.includes('.daksh/prompts')) delete settings['chat.modeFilesLocations'][key];
+    }
+    settings['chat.modeFilesLocations']['.daksh/prompts/**/'] = true;
     if (!dryRun) {
-        if (!fs.existsSync('.vscode')) {
-            fs.mkdirSync('.vscode', { recursive: true });
-        }
-        
-        let settings = {};
-        
-        // Read existing settings if they exist
-        if (fs.existsSync(vscodePath)) {
-            try {
-                settings = JSON.parse(fs.readFileSync(vscodePath, 'utf8'));
-            } catch (e) {
-                info('Warning: Could not parse existing .vscode/settings.json');
-            }
-        }
-        
-        // Read template settings from assets
-        if (fs.existsSync(settingsSource)) {
-            try {
-                const templateSettings = JSON.parse(fs.readFileSync(settingsSource, 'utf8'));
-                // Merge template settings with existing settings
-                settings = { ...settings, ...templateSettings };
-            } catch (e) {
-                info('Warning: Could not parse template settings.json');
-            }
-        }
-        
+        if (!fs.existsSync('.vscode')) fs.mkdirSync('.vscode', { recursive: true });
         fs.writeFileSync(vscodePath, JSON.stringify(settings, null, 2));
         addedFiles.push(vscodePath);
     } else {
-        info(`Would update ${vscodePath} using template from ${settingsSource}`);
+        info(`Would write merged settings with templates glob to ${vscodePath}`);
     }
 
      // Update .vscode/mcp.json
