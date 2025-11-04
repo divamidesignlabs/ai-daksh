@@ -1,0 +1,36 @@
+{
+    "name": "daksh-ai",
+    "version": "0.7.1",
+    "description": "Documentation & Artifact Knowledge Synchronization Hub",
+    "main": "bin/daksh.js",
+    "bin": {
+        "daksh": "./bin/daksh.js"
+    },
+    "scripts": {
+        "test": "echo \"Error: no test specified\" && exit 1"
+    },
+    "repository": {
+        "type": "git",
+        "url": "git+https://github.com/divamidesignlabs/daksh.git"
+    },
+    "keywords": [
+        "documentation",
+        "prompts",
+        "development",
+        "cli"
+    ],
+    "author": "Yeshwanth Reddy <yeshwanth@divami.com>",
+    "license": "MIT",
+    "bugs": {
+        "url": "https://github.com/divamidesignlabs/daksh/issues"
+    },
+    "homepage": "https://github.com/divamidesignlabs/daksh#readme",
+    "files": [
+        "bin/",
+        "assets/",
+        "README.md"
+    ],
+    "engines": {
+        "node": ">=14.0.0"
+    }
+}
