@@ -101,8 +101,12 @@ The `update-prompts` command will add/update the following files in your project
 
 - `.daksh/` - Prompt templates and guidelines
 - `.vscode/settings.json` - VS Code configuration for prompts
+- `.vscode/mcp.json` - VS Code configuration for mcp servers
+- `.vscode/tasks.json` - VS Code configuration for mkdocs preview
 - `.github/copilot-instructions.md` - GitHub Copilot instructions
 - `mkdocs.yml` - Documentation configuration
+- `run-mkdocs.sh` - Script to run mkdocs locally
+- `mkdocs_deps.txt` - necessary dependencies to run mkdocs locally
 - `docs/overrides/extra.css` - Documentation styling
 - `overrides/` - MkDocs overrides
 - `docs/index.md` - Documentation index (if it doesn't exist)

@@ -219,17 +219,33 @@ function updatePrompts(dryRun = false) {
             if (fs.existsSync(tasksPath)) {
                 try {
                     tasksData = JSON.parse(fs.readFileSync(tasksPath, 'utf8'));
+                    if (!tasksData.tasks) tasksData.tasks = [];
                 } catch (e) {
                     info('Warning: Could not parse existing tasks.json; using template');
                 }
             }
             
-            // Read template tasks.json from assets
+            // Read template tasks.json from assets and merge tasks array
             if (fs.existsSync(tasksSource)) {
                 try {
                     const templateTasks = JSON.parse(fs.readFileSync(tasksSource, 'utf8'));
-                    // Use template tasks, but preserve version and merge with existing if needed
-                    tasksData = { ...tasksData, ...templateTasks };
+                    if (templateTasks.tasks && Array.isArray(templateTasks.tasks)) {
+                        // Get existing task labels to avoid duplicates
+                        const existingLabels = new Set(tasksData.tasks.map(t => t.label));
+                        // Append only new tasks from template
+                        for (const task of templateTasks.tasks) {
+                            if (!existingLabels.has(task.label)) {
+                                tasksData.tasks.push(task);
+                                info(`Adding new task: ${task.label}`);
+                            } else {
+                                info(`Skipping duplicate task: ${task.label}`);
+                            }
+                        }
+                    }
+                    // Preserve version from template if present
+                    if (templateTasks.version) {
+                        tasksData.version = templateTasks.version;
+                    }
                 } catch (e) {
                     info('Warning: Could not parse template tasks.json');
                 }
@@ -388,8 +404,35 @@ function updateResearchPrompts(dryRun = false) {
             const tasksPath = '.vscode/tasks.json';
             const tasksSource = path.join(assetsDir, 'json-files', 'tasks.json');
             let tasksData = { version: '2.0.0', tasks: [] };
-            if (fs.existsSync(tasksPath)) { try { tasksData = JSON.parse(fs.readFileSync(tasksPath, 'utf8')); } catch { info('Warning: Could not parse existing tasks.json; using template'); } }
-            if (fs.existsSync(tasksSource)) { try { const templateTasks = JSON.parse(fs.readFileSync(tasksSource, 'utf8')); tasksData = { ...tasksData, ...templateTasks }; } catch { info('Warning: Could not parse template tasks.json'); } }
+            if (fs.existsSync(tasksPath)) { 
+                try { 
+                    tasksData = JSON.parse(fs.readFileSync(tasksPath, 'utf8')); 
+                    if (!tasksData.tasks) tasksData.tasks = [];
+                } catch { 
+                    info('Warning: Could not parse existing tasks.json; using template'); 
+                } 
+            }
+            if (fs.existsSync(tasksSource)) { 
+                try { 
+                    const templateTasks = JSON.parse(fs.readFileSync(tasksSource, 'utf8')); 
+                    if (templateTasks.tasks && Array.isArray(templateTasks.tasks)) {
+                        const existingLabels = new Set(tasksData.tasks.map(t => t.label));
+                        for (const task of templateTasks.tasks) {
+                            if (!existingLabels.has(task.label)) {
+                                tasksData.tasks.push(task);
+                                info(`Adding new task: ${task.label}`);
+                            } else {
+                                info(`Skipping duplicate task: ${task.label}`);
+                            }
+                        }
+                    }
+                    if (templateTasks.version) {
+                        tasksData.version = templateTasks.version;
+                    }
+                } catch { 
+                    info('Warning: Could not parse template tasks.json'); 
+                } 
+            }
             if (!fs.existsSync('.vscode')) fs.mkdirSync('.vscode', { recursive: true });
             fs.writeFileSync(tasksPath, JSON.stringify(tasksData, null, 2));
             addedFiles.push(tasksPath);

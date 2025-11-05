@@ -112,4 +112,4 @@ ENV/
 # IDE settings
 .vscode/
 .idea/
-.package.json
+package.json
