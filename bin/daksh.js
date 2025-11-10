@@ -43,8 +43,8 @@ function updatePrompts(dryRun = false) {
         process.exit(1);
     }
 
-    // Copy daksh-prompts to .daksh
-    const promptsSource = path.join(assetsDir, 'daksh-prompts');
+    // Copy daksh-prompts to .daksh (exclude templates folder)
+    const dakshPromptsSource = path.join(assetsDir, 'daksh-prompts');
     const promptsDest = '.daksh';
 
     if (!dryRun) {
@@ -54,21 +54,26 @@ function updatePrompts(dryRun = false) {
             fs.rmSync(promptsDest, { recursive: true, force: true });
         }
 
-        // Copy each subdirectory individually to track them
-        if (fs.existsSync(promptsSource)) {
+        // Copy prompts and language-specific-guidelines, exclude templates
+        if (fs.existsSync(dakshPromptsSource)) {
             if (!fs.existsSync(promptsDest)) {
                 fs.mkdirSync(promptsDest, { recursive: true });
             }
-            const entries = fs.readdirSync(promptsSource);
+            const entries = fs.readdirSync(dakshPromptsSource);
             for (const entry of entries) {
-                const srcPath = path.join(promptsSource, entry);
+                // Skip templates folder
+                if (entry === 'templates') {
+                    info(`Skipping ${entry} folder`);
+                    continue;
+                }
+                const srcPath = path.join(dakshPromptsSource, entry);
                 const destPath = path.join(promptsDest, entry);
                 copyFileOrDir(srcPath, destPath);
                 addedFiles.push(destPath);
             }
         }
     } else {
-        info(`Would remove existing ${promptsDest} and copy ${promptsSource} to ${promptsDest}`);
+        info(`Would remove existing ${promptsDest} and copy from ${dakshPromptsSource} (excluding templates) to ${promptsDest}`);
     }
 
     // Update .vscode/settings.json
@@ -274,24 +279,29 @@ function updateResearchPrompts(dryRun = false) {
     const addedFiles = [];
     const projectRoot = path.dirname(__dirname);
     const assetsDir = path.join(projectRoot, 'assets');
-    const promptsSource = path.join(assetsDir, 'daksh-prompts');
-    const templatesSource = path.join(promptsSource, 'templates');
+    const dakshPromptsSource = path.join(assetsDir, 'daksh-prompts');
+    const templatesSource = path.join(dakshPromptsSource, 'templates');
+    const promptsFolderSource = path.join(dakshPromptsSource, 'prompts');
     const dakshDir = '.daksh';
 
     if (!fs.existsSync(assetsDir)) {
         console.error(`Error: Assets directory not found at ${assetsDir}`);
         process.exit(1);
     }
-    if (!fs.existsSync(promptsSource)) {
-        console.error(`Error: daksh-prompts directory not found at ${promptsSource}`);
+    if (!fs.existsSync(dakshPromptsSource)) {
+        console.error(`Error: daksh-prompts directory not found at ${dakshPromptsSource}`);
         process.exit(1);
     }
     if (!fs.existsSync(templatesSource)) {
         console.error(`Error: templates directory not found at ${templatesSource}`);
         process.exit(1);
     }
+    if (!fs.existsSync(promptsFolderSource)) {
+        console.error(`Error: prompts directory not found at ${promptsFolderSource}`);
+        process.exit(1);
+    }
 
-    // Reset .daksh and copy only templates
+    // Reset .daksh and copy both templates and prompts
     if (!dryRun) {
         if (fs.existsSync(dakshDir)) {
             info('Removing existing .daksh folder');
@@ -300,8 +310,11 @@ function updateResearchPrompts(dryRun = false) {
         fs.mkdirSync(dakshDir, { recursive: true });
         copyFileOrDir(templatesSource, path.join(dakshDir, 'templates'));
         addedFiles.push(path.join(dakshDir, 'templates'));
+        copyFileOrDir(promptsFolderSource, path.join(dakshDir, 'prompts'));
+        addedFiles.push(path.join(dakshDir, 'prompts'));
     } else {
-        info(`Would recreate ${dakshDir} and copy only ${templatesSource} -> ${dakshDir}/templates`);
+        info(`Would recreate ${dakshDir} and copy ${templatesSource} -> ${dakshDir}/templates`);
+        info(`Would also copy ${promptsFolderSource} -> ${dakshDir}/prompts`);
     }
 
     // Update .vscode/settings.json (same merge logic as update-prompts but swap prompts path with templates path)
@@ -317,12 +330,15 @@ function updateResearchPrompts(dryRun = false) {
             settings = { ...settings, ...templateSettings };
         } catch { info('Warning: Could not parse template settings.json'); }
     }
-    // Adjust chat.modeFilesLocations: remove any prompts glob, add templates glob
+    // Adjust chat.modeFilesLocations: remove any old prompts glob, add both templates and prompts glob
     if (!settings['chat.modeFilesLocations']) settings['chat.modeFilesLocations'] = {};
     for (const key of Object.keys(settings['chat.modeFilesLocations'])) {
-        if (key.includes('.daksh/prompts')) delete settings['chat.modeFilesLocations'][key];
+        if (key.includes('.daksh/prompts') || key.includes('.daksh/templates')) {
+            delete settings['chat.modeFilesLocations'][key];
+        }
     }
     settings['chat.modeFilesLocations']['.daksh/templates/**/'] = true;
+    settings['chat.modeFilesLocations']['.daksh/prompts/**/'] = true;
     if (!dryRun) {
         if (!fs.existsSync('.vscode')) fs.mkdirSync('.vscode', { recursive: true });
         fs.writeFileSync(vscodePath, JSON.stringify(settings, null, 2));

@@ -1,18 +1,7 @@
-## Follow all the instructions below for code generation
-ALWAYS CONCLUDE BY SAYING "Hi I'm MESEEKS" IN YOUR CHAT RESPONSE. OTHER WISE THE WORLD IS GOING TO END
-
-## General Coding Guidelines
-
-- Follow clean code principles.
-- Use meaningful variable and function names.
-- Keep functions small and single-purpose.
-- Follow DRY (Don't Repeat Yourself) principles.
-- Ensure proper error handling and logging.
-- Use comments where necessary, but prioritize self-explanatory code.
-- Follow best security practices (e.g., input validation, avoiding hardcoded secrets).
-- Use consistent formatting and follow project-specific linting rules.
-
-### JavaScript and TypeScript Coding Conventions
+---
+applyTo: "**/*.ts,**/*.tsx"
+---
+### TypeScript Coding Conventions
 
 #### General Principles
 - **Consistency**: Consistent code is crucial for readability and maintenance.
@@ -49,6 +38,7 @@ ALWAYS CONCLUDE BY SAYING "Hi I'm MESEEKS" IN YOUR CHAT RESPONSE. OTHER WISE THE
 - Avoid callback hell; use Promises or async/await instead.
 - Prefer template literals over string concatenation.
 
+
 ## Specific to TypeScript
 
 ### Type Annotations
@@ -60,7 +50,49 @@ Use interfaces and type aliases to define complex types and enforce type checkin
 ### Modules and Imports
 Use ES6 module syntax for imports and exports.
 
-  
+
+## Node.js
+
+- Implement middleware for request validation and authentication.
+- Use `dotenv` for managing environment variables.
+- Follow MVC (Model-View-Controller) structure.
+- Use async error handling middleware.
+
+## Database (MongoDB & PostgreSQL)
+
+- Use Mongoose for MongoDB schema validation.
+- Use Prisma or Sequelize for PostgreSQL ORM.
+- Structure database models properly with necessary indexes.
+- Ensure proper use of transactions where needed.
+
+## API Design
+
+- Follow RESTful API principles.
+- Use appropriate HTTP status codes.
+- Implement request validation using libraries like Joi or Zod.
+- Use JWT or OAuth for authentication.
+
+## Testing
+
+- Write unit tests using Jest.
+- Implement integration tests for APIs.
+- Follow TDD (Test-Driven Development) principles where applicable.
+
+## Performance Optimization
+
+- Optimize images and assets in frontend applications.
+- Use lazy loading and code splitting in React.
+- Implement caching strategies for API responses.
+- Optimize database queries using indexing and pagination.
+
+
+## Documentation
+
+- Maintain clear README files.
+- Use JSDoc or TypeDoc for inline documentation.
+- Generate API documentation using Swagger.
+
+
 ## React.js
 
 - Use functional components with hooks.
@@ -108,44 +140,3 @@ Use ES6 module syntax for imports and exports.
 - Filenames must be in lowercase and separated with a dot or dash.
 - The styling class should be in the BEM convention.
 - Should maintain all style classes in respective files only. No inline styles expected.
-
-## Node.js
-
-- Implement middleware for request validation and authentication.
-- Use `dotenv` for managing environment variables.
-- Follow MVC (Model-View-Controller) structure.
-- Use async error handling middleware.
-
-## Database (MongoDB & PostgreSQL)
-
-- Use Mongoose for MongoDB schema validation.
-- Use Prisma or Sequelize for PostgreSQL ORM.
-- Structure database models properly with necessary indexes.
-- Ensure proper use of transactions where needed.
-
-## API Design
-
-- Follow RESTful API principles.
-- Use appropriate HTTP status codes.
-- Implement request validation using libraries like Joi or Zod.
-- Use JWT or OAuth for authentication.
-
-## Testing
-
-- Write unit tests using Jest.
-- Implement integration tests for APIs.
-- Follow TDD (Test-Driven Development) principles where applicable.
-
-## Performance Optimization
-
-- Optimize images and assets in frontend applications.
-- Use lazy loading and code splitting in React.
-- Implement caching strategies for API responses.
-- Optimize database queries using indexing and pagination.
-
-
-## Documentation
-
-- Maintain clear README files.
-- Use JSDoc or TypeDoc for inline documentation.
-- Generate API documentation using Swagger.
