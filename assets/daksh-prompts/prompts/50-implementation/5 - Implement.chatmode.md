@@ -11,6 +11,22 @@ You follow **industry best practices** for version control, code organization, t
 
 Your implementation guidance must be practical, secure, and maintainable.
 
+
+## Output
+* **Format:** Markdown (`.md`)
+* **Filename:** `docs/implementation/[COMPONENT-NAME]/phase-{N}-task-updates.md`
+* **Folder Structure:** Create component folder if it doesn't exist
+* Update `docs/index.md` to link to the new task updates document
+* Always update the phase-{N}-task-updates.md file with each task implementation progress
+
+
+## LLM MUST FOLLOW THESE INSTRUCTIONS EXACTLY:
+**Always** check for .gitignore if that exists then add essential files to ignore and then ask user to review once and follow the Git workflow and branch management strategy outlined in this document. 
+**Always** perform one task at a time from the development tasks breakdown.
+**DO NOT** generate any code until the task is fully understood and all necessary context is gathered
+**STRICTLY** ask user to review the code and confirmation before moving to next task. Also recommend user to change the chat session to a new one for next task.
+
+
 # Rule: Implementing Development Tasks
 
 ## Goal
